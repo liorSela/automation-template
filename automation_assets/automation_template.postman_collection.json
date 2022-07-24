@@ -1,0 +1,183 @@
+{
+	"info": {
+		"_postman_id": "a1f4df41-cd70-47b5-a7b6-6bb47db27202",
+		"name": "template",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Run local test",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"let testResultsStr = pm.response.text();\r",
+							"console.log(testResultsStr)\r",
+							"\r",
+							"pm.test(\"Total Failures: \" + (JSON.parse(testResultsStr)).stats.failures, function () {\r",
+							"    pm.expect((JSON.parse(testResultsStr)).stats.failures).to.equal(0);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Total Passes: \" + (JSON.parse(testResultsStr)).stats.passes, function () {\r",
+							"    pm.expect((JSON.parse(testResultsStr)).stats.passes).to.be.above(0);\r",
+							"});\r",
+							"\r",
+							"let resultStr = JSON.stringify((JSON.parse(testResultsStr)).results[0]);\r",
+							"\r",
+							"let testsArr = resultStr.split('\"suites\":[{\"');\r",
+							"for (let j = 1; j < testsArr.length; j++) {\r",
+							"    if (!testsArr[j].includes('\"tests\":[{\"')) {\r",
+							"        continue;\r",
+							"    }\r",
+							"\r",
+							"    let innerTestsArr = testsArr[j].split('\"title\"');\r",
+							"\r",
+							"    for (let i = 1; i < innerTestsArr.length; i++) {\r",
+							"        if (innerTestsArr[i].includes('\"tests\":[{') || innerTestsArr[i].includes('\"tests\":[]')) {\r",
+							"            continue;\r",
+							"        }\r",
+							"        //if (!innerTestsArr[i].includes(\"passed\") || innerTestsArr[i].includes(\"Test Data\")) {\r",
+							"        let tempTestObj = JSON.parse('{\"test\"' + innerTestsArr[i].split(',\"uuid\":\"')[0] + '}');\r",
+							"        pm.test(tempTestObj.fullTitle, function () {\r",
+							"            if (tempTestObj.fail) {\r",
+							"                pm.expect.fail(tempTestObj.err.message);\r",
+							"            } else {\r",
+							"                pm.expect(JSON.parse(tempTestObj.pass)).to.be.true;\r",
+							"            }\r",
+							"        });\r",
+							"        //}\r",
+							"    }\r",
+							"}\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"varKeyPro\": \"{{varKeyPro}}\",\r\n    \"varKeyEU\": \"{{varKeyEU}}\",\r\n    \"varKeyStage\": \"{{varKeyStage}}\",\r\n    \"servicesFramework\": \"{{servicesFramework}}\",\r\n    \"crossPlatformsApi\": \"{{crossPlatformsApi}}\",\r\n    \"webAppApiPlatform\": \"{{webAppApiPlatform}}\",\r\n    \"webAppPlatform\": \"{{webAppPlatform}}\",\r\n    \"settingsFramework\": \"{{settingsFramework}}\",\r\n    \"addonsManager\": \"{{addonsManager}}\",\r\n    \"dataViewsApi\": \"{{dataViewsApi}}\",\r\n    \"adal\": \"{{adal}}\",\r\n    \"pepperiNotificationService\": \"{{pepperiNotificationService}}\",\r\n    \"relations\": \"{{relations}}\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:4400/tests/fill_wanted_test_endpoint",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4400",
+					"path": [
+						"tests",
+						"fill_wanted_test_endpoint"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Run local data_index test",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"let testResultsStr = pm.response.text();\r",
+							"console.log(testResultsStr)\r",
+							"\r",
+							"pm.test(\"Total Failures: \" + (JSON.parse(testResultsStr)).stats.failures, function () {\r",
+							"    pm.expect((JSON.parse(testResultsStr)).stats.failures).to.equal(0);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Total Passes: \" + (JSON.parse(testResultsStr)).stats.passes, function () {\r",
+							"    pm.expect((JSON.parse(testResultsStr)).stats.passes).to.be.above(0);\r",
+							"});\r",
+							"\r",
+							"let resultStr = JSON.stringify((JSON.parse(testResultsStr)).results[0]);\r",
+							"\r",
+							"let testsArr = resultStr.split('\"suites\":[{\"');\r",
+							"for (let j = 1; j < testsArr.length; j++) {\r",
+							"    if (!testsArr[j].includes('\"tests\":[{\"')) {\r",
+							"        continue;\r",
+							"    }\r",
+							"\r",
+							"    let innerTestsArr = testsArr[j].split('\"title\"');\r",
+							"\r",
+							"    for (let i = 1; i < innerTestsArr.length; i++) {\r",
+							"        if (innerTestsArr[i].includes('\"tests\":[{') || innerTestsArr[i].includes('\"tests\":[]')) {\r",
+							"            continue;\r",
+							"        }\r",
+							"        //if (!innerTestsArr[i].includes(\"passed\") || innerTestsArr[i].includes(\"Test Data\")) {\r",
+							"        let tempTestObj = JSON.parse('{\"test\"' + innerTestsArr[i].split(',\"uuid\":\"')[0] + '}');\r",
+							"        pm.test(tempTestObj.fullTitle, function () {\r",
+							"            if (tempTestObj.fail) {\r",
+							"                pm.expect.fail(tempTestObj.err.message);\r",
+							"            } else {\r",
+							"                pm.expect(JSON.parse(tempTestObj.pass)).to.be.true;\r",
+							"            }\r",
+							"        });\r",
+							"        //}\r",
+							"    }\r",
+							"}\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"varKeyPro\": \"{{varKeyPro}}\",\r\n    \"varKeyEU\": \"{{varKeyEU}}\",\r\n    \"varKeyStage\": \"{{varKeyStage}}\",\r\n    \"servicesFramework\": \"{{servicesFramework}}\",\r\n    \"crossPlatformsApi\": \"{{crossPlatformsApi}}\",\r\n    \"webAppApiPlatform\": \"{{webAppApiPlatform}}\",\r\n    \"webAppPlatform\": \"{{webAppPlatform}}\",\r\n    \"settingsFramework\": \"{{settingsFramework}}\",\r\n    \"addonsManager\": \"{{addonsManager}}\",\r\n    \"dataViewsApi\": \"{{dataViewsApi}}\",\r\n    \"adal\": \"{{adal}}\",\r\n    \"pepperiNotificationService\": \"{{pepperiNotificationService}}\",\r\n    \"relations\": \"{{relations}}\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:4400/tests/addons_uninstall",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4400",
+					"path": [
+						"tests",
+						"addons_uninstall"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

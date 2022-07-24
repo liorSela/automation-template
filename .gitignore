@@ -1,0 +1,8 @@
+/publish/api
+/publish/editors
+var_sk
+/potentialQA_SDK/node_modules
+**/node_modules/**
+server-side/node_modules
+client-side/node_modules
+/node_modules
