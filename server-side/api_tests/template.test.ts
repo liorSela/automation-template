@@ -10,7 +10,7 @@ export async function TemplateTests(generalService: GeneralService, request, tes
 
     //#region Upgrade Relevant Addons For Test -- here we are describing the relevant addons which have to be installed on certain version to run the test
     const testData = {
-        'AddonNumber1Name': ['AddonNumber1UUID', ''], //sending no version will result in getting the LATEST avalibale version
+        'AddonNumber1Name': ['AddonNumber1UUID', ''], //sending no version will result in getting the LATEST avalibale phased version
         'AddonNumber2Name': ['AddonNumber2UUID', 'Addon2Version'], //sending specific version will result in searching this version as published 
     };
     //saving relevant var key based on the env which we run on
@@ -20,45 +20,45 @@ export async function TemplateTests(generalService: GeneralService, request, tes
     } else {
         varKey = request.body.varKeyPro;
     }
-    const chnageVersionResponseArr = await generalService.changeVersion(varKey, testData, false); //installing the descirbed addons
+    //installing the descirbed addons -- passing 'false' will result in searching all versions, 'true' will result in searhing phased versions only - this may collide with 'testData' 
+    const chnageVersionResponseArr = await generalService.changeVersion(varKey, testData, false); 
     const isInstalledArr = await generalService.areAddonsInstalled(testData); //testing all addons installed on 'asked' version
     //#endregion Upgrade Relevant Addons For Test
 
-    describe('Template Tests Suites', () => {
-        // describe('Prerequisites Addon for Template Tests', () => { //done to print all relevant versions + test all correct
-        //         /**
-        //          * THIS SHOULD BE LEFT AS IS - ONLY NAMES SHOULD CHANGE
-        //          */
-        //     isInstalledArr.forEach((isInstalled, index) => {
-        //         it(`Validate That Needed Addon Is Installed: ${Object.keys(testData)[index]}`, () => {
-        //             expect(isInstalled).to.be.true;
-        //         });
-        //     });
+    describe('Template Tests Suites', () => {//the string inside the desribes will effect the report - name should be changed
+        describe('Prerequisites Addon for Template Tests', () => { //done to validate addons which failed to install failed on 'is already working on version'
+                /**
+                 * THIS SHOULD BE LEFT AS IS
+                 */
+            isInstalledArr.forEach((isInstalled, index) => {
+                it(`Validate That Needed Addon Is Installed: ${Object.keys(testData)[index]}`, () => {
+                    expect(isInstalled).to.be.true;
+                });
+            });
 
-        //     for (const addonName in testData) {
-        //         const addonUUID = testData[addonName][0];
-        //         const version = testData[addonName][1];
-        //         const varLatestVersion = chnageVersionResponseArr[addonName][2];
-        //         const changeType = chnageVersionResponseArr[addonName][3];
-        //         describe(`Test Data: ${addonName}`, () => {
-        //             it(`${changeType} To Latest Version That Start With: ${version ? version : 'any'}`, () => {
-        //                 if (chnageVersionResponseArr[addonName][4] == 'Failure') {
-        //                     expect(chnageVersionResponseArr[addonName][5]).to.include('is already working on version');
-        //                 } else {
-        //                     expect(chnageVersionResponseArr[addonName][4]).to.include('Success');
-        //                 }
-        //             });
+            for (const addonName in testData) {
+                const addonUUID = testData[addonName][0];
+                const version = testData[addonName][1];
+                const varLatestVersion = chnageVersionResponseArr[addonName][2];
+                const changeType = chnageVersionResponseArr[addonName][3];
+                describe(`Test Data: ${addonName}`, () => {
+                    it(`${changeType} To Latest Version That Start With: ${version ? version : 'any'}`, () => {
+                        if (chnageVersionResponseArr[addonName][4] == 'Failure') {
+                            expect(chnageVersionResponseArr[addonName][5]).to.include('is already working on version');
+                        } else {
+                            expect(chnageVersionResponseArr[addonName][4]).to.include('Success');
+                        }
+                    });
 
-        //             it(`Latest Version Is Installed ${varLatestVersion}`, async () => {
-        //                 await expect(generalService.papiClient.addons.installedAddons.addonUUID(`${addonUUID}`).get())
-        //                     .eventually.to.have.property('Version')
-        //                     .a('string')
-        //                     .that.is.equal(varLatestVersion);
-        //             });
-        //         });
-        //     }
-        // });
-
+                    it(`Latest Version Is Installed ${varLatestVersion}`, async () => {
+                        await expect(generalService.papiClient.addons.installedAddons.addonUUID(`${addonUUID}`).get())
+                            .eventually.to.have.property('Version')
+                            .a('string')
+                            .that.is.equal(varLatestVersion);
+                    });
+                });
+            }
+        });
         describe('Test Suit Example', () => {
             const service = new ObjectsService(generalService);
             it('Basic Test Example #1: Using Objects Service To Validate All Users Data Entrys Are Valid', async () => {
