@@ -1,4 +1,4 @@
-import GeneralService, { TesterFunctions } from '../potentialQA_SDK/general.service';
+import GeneralService, { TesterFunctions } from '../potentialQA_SDK/server_side/general.service';
 import { Client, Request } from '@pepperi-addons/debug-server';
 
 import {

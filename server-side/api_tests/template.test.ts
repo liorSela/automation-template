@@ -1,5 +1,5 @@
 import { User } from "@pepperi-addons/papi-sdk";
-import GeneralService, { TesterFunctions } from "../../potentialQA_SDK/general.service";
+import GeneralService, { TesterFunctions } from "../../potentialQA_SDK/server_side/general.service";
 import { ObjectsService } from "./services/example.objects.service";
 
 export async function TemplateTests(generalService: GeneralService, request, tester: TesterFunctions) {
