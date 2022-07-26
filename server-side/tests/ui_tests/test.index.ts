@@ -39,7 +39,8 @@ const pass = process.env.npm_config_user_pass as string;
 const varPass = process.env.npm_config_var_pass as string;
 const varPassEU = process.env.npm_config_var_pass_eu as string;
 
-(async function () {
+
+(async function () {//infra code shouldnt be touched
     const tempGeneralService = new GeneralService({
         AddonUUID: '',
         AddonSecretKey: '',
@@ -165,7 +166,8 @@ const varPassEU = process.env.npm_config_var_pass_eu as string;
         }
     });
 
-    if (tests.includes('login')) {
+    /**your tests go here */
+    if (tests.includes('login')) {//example test
         await LoginTests(email, pass);
         await TestDataTests(generalService, { describe, expect, it } as TesterFunctions);
     }
@@ -173,6 +175,7 @@ const varPassEU = process.env.npm_config_var_pass_eu as string;
     run();
 })();
 
+/**infra functions - shouldnt be touched */
 export async function newUserDependenciesTests(generalService: GeneralService, varPass: string) {
     const baseAddonVersionsInstallationResponseObj = await generalService.baseAddonVersionsInstallation(
         varPass,
