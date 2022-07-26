@@ -3,7 +3,7 @@ import addContext from 'mochawesome/addContext';
 import { By, Key } from 'selenium-webdriver';
 import { AddonPage, WebAppDialog, WebAppHeader, WebAppList, WebAppSettingsSidePanel, WebAppTopBar } from '../index';
 import { ConsoleColors } from '../../../server_side/general.service';
-import { ImportExportATDService, ObjectsService, GeneralService } from '../../../../server-side/api_tests/index';
+import { ImportExportATDService, ObjectsService, GeneralService } from '../../../server_side/serverInfra.index';
 import { AddonLoadCondition } from './base/AddonPage';
 import { PepperiStatus, WorkflowAction } from '../Enumerations/index';
 import { v4 as uuidv4 } from 'uuid';

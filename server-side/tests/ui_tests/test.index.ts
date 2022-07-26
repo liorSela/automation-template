@@ -3,18 +3,18 @@ import GeneralService, {
     TesterFunctions,
     ResourceTypes,
     testDataForInitUser,
-} from '../../potentialQA_SDK/server_side/general.service';
+} from '../../../potentialQA_SDK/server_side/general.service';
 import fs from 'fs';
 import { describe, it, after, beforeEach, afterEach, run } from 'mocha';
 import chai, { expect } from 'chai';
 import promised from 'chai-as-promised';
 import {
     TestDataTests,
-} from '../api_tests/index';
+} from '../../../potentialQA_SDK/server_side/serverInfra.index';
 import {
     LoginTests,
 } from './index';
-import { ObjectsService } from '../../potentialQA_SDK/server_side/objects.service';
+import { ObjectsService } from '../../../potentialQA_SDK/server_side/objects.service';
 import { Client } from '@pepperi-addons/debug-server';
 import { UIControl } from '@pepperi-addons/papi-sdk';
 

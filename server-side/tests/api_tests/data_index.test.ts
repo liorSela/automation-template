@@ -1,6 +1,6 @@
 import { ObjectsService } from './services/example.objects.service';
-import { DataIndexService } from '../../potentialQA_SDK/server_side/data-index.service';
-import GeneralService, { TesterFunctions } from '../../potentialQA_SDK/server_side/general.service';
+import { DataIndexService } from '../../../potentialQA_SDK/server_side/data-index.service';
+import GeneralService, { TesterFunctions } from '../../../potentialQA_SDK/server_side/general.service';
 
 export async function DataIndexTests(generalService: GeneralService, request, tester: TesterFunctions) {
     const objectsService = new ObjectsService(generalService);

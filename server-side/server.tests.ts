@@ -2,10 +2,11 @@ import GeneralService, { TesterFunctions } from '../potentialQA_SDK/server_side/
 import { Client, Request } from '@pepperi-addons/debug-server';
 
 import {
-    TestDataTests,
     DataIndexTests,
     TemplateTests,
-} from './api_tests/index';
+} from './tests/api_tests/index';
+
+import {TestDataTests} from '../potentialQA_SDK/server_side/serverInfra.index';
 
 let testName = '';
 

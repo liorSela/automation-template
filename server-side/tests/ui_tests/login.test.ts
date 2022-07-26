@@ -1,6 +1,6 @@
-import { Browser } from '../../potentialQA_SDK/e2e/utilities/browser';
+import { Browser } from '../../../potentialQA_SDK/e2e/utilities/browser';
 import { describe, it, afterEach, beforeEach } from 'mocha';
-import { WebAppLoginPage } from '../../potentialQA_SDK/e2e/pom/Pages/WebAppLoginPage';
+import { WebAppLoginPage } from '../../../potentialQA_SDK/e2e/e2eInfra.index';
 
 export async function LoginTests(email: string, password: string) {
     let driver: Browser;
