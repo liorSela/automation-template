@@ -25,8 +25,8 @@ export async function TemplateTests(generalService: GeneralService, request, tes
     const isInstalledArr = await generalService.areAddonsInstalled(testData); //testing all addons installed on 'asked' version
     //#endregion Upgrade Relevant Addons For Test
 
-    describe('Template Tests Suites', () => {//the string inside the desribes will effect the report - name should be changed
-        describe('Prerequisites Addon for Template Tests', () => { //done to validate addons which failed to install failed on 'is already working on version'
+    describe('TemplateTests Suites', () => {//the string inside the desribes will effect the report - name should be changed
+        describe('Prerequisites Addon for TemplateTests', () => { //done to validate addons which failed to install failed on 'is already working on version'
                 /**
                  * THIS SHOULD BE LEFT AS IS
                  */
@@ -59,7 +59,7 @@ export async function TemplateTests(generalService: GeneralService, request, tes
                 });
             }
         });
-        describe('Test Suit Example', () => {
+        describe('TemplateTests Example Suit', () => {
             const service = new ObjectsService(generalService);
             it('Basic Test Example #1: Using Objects Service To Validate All Users Data Entrys Are Valid', async () => {
                 // This Is An Example Of How To Write Tests - Using Example Service From Automation Infra - Objects
