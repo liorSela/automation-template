@@ -11,4 +11,10 @@ export class TemplateService {
         this.papiClient = service.papiClient;
         this.generalService = service;
     }
+
+    //this is a generic example of how service functions usually look like -- you can also check the 'example.objects.service.ts' file for reference
+    getResource() {
+        let url = '/resource';
+        return this.papiClient.get(url);
+    }
 }

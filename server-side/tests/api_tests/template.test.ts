@@ -8,59 +8,10 @@ export async function TemplateTests(generalService: GeneralService, request, tes
     const expect = tester.expect;
     const it = tester.it;
 
-    //#region Upgrade Relevant Addons For Test -- here we are describing the relevant addons which have to be installed on certain version to run the test
-    const testData = {
-        'AddonNumber1Name': ['AddonNumber1UUID', ''], //sending no version will result in getting the LATEST avalibale phased version
-        'AddonNumber2Name': ['AddonNumber2UUID', 'Addon2Version'], //sending specific version will result in searching this version as published 
-    };
-    //saving relevant var key based on the env which we run on
-    let varKey;
-    if (generalService.papiClient['options'].baseURL.includes('staging')) {
-        varKey = request.body.varKeyStage;
-    } else {
-        varKey = request.body.varKeyPro;
-    }
-    //installing the descirbed addons -- passing 'false' will result in searching all versions, 'true' will result in searhing phased versions only - this may collide with 'testData' 
-    const chnageVersionResponseArr = await generalService.changeVersion(varKey, testData, false); 
-    const isInstalledArr = await generalService.areAddonsInstalled(testData); //testing all addons installed on 'asked' version
-    //#endregion Upgrade Relevant Addons For Test
-
     describe('TemplateTests Suites', () => {//the string inside the desribes will effect the report - name should be changed
-        describe('Prerequisites Addon for TemplateTests', () => { //done to validate addons which failed to install failed on 'is already working on version'
-                /**
-                 * THIS SHOULD BE LEFT AS IS
-                 */
-            isInstalledArr.forEach((isInstalled, index) => {
-                it(`Validate That Needed Addon Is Installed: ${Object.keys(testData)[index]}`, () => {
-                    expect(isInstalled).to.be.true;
-                });
-            });
-
-            for (const addonName in testData) {
-                const addonUUID = testData[addonName][0];
-                const version = testData[addonName][1];
-                const varLatestVersion = chnageVersionResponseArr[addonName][2];
-                const changeType = chnageVersionResponseArr[addonName][3];
-                describe(`Test Data: ${addonName}`, () => {
-                    it(`${changeType} To Latest Version That Start With: ${version ? version : 'any'}`, () => {
-                        if (chnageVersionResponseArr[addonName][4] == 'Failure') {
-                            expect(chnageVersionResponseArr[addonName][5]).to.include('is already working on version');
-                        } else {
-                            expect(chnageVersionResponseArr[addonName][4]).to.include('Success');
-                        }
-                    });
-
-                    it(`Latest Version Is Installed ${varLatestVersion}`, async () => {
-                        await expect(generalService.papiClient.addons.installedAddons.addonUUID(`${addonUUID}`).get())
-                            .eventually.to.have.property('Version')
-                            .a('string')
-                            .that.is.equal(varLatestVersion);
-                    });
-                });
-            }
-        });
         describe('TemplateTests Example Suit', () => {
             const service = new ObjectsService(generalService);
+            //templateToTeplaceWithCtor
             it('Basic Test Example #1: Using Objects Service To Validate All Users Data Entrys Are Valid', async () => {
                 // This Is An Example Of How To Write Tests - Using Example Service From Automation Infra - Objects
                 /**
