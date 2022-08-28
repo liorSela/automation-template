@@ -9,8 +9,7 @@ A template for creating a pepperi automation test using QA team infra
 
 ## Installation
 ---
-TODO
----
+1. run `npm run init` from the root
 
 ## Project structure
 ---
@@ -42,6 +41,7 @@ the way I currently see it - no reason to publish this
 ## How To Use
 ---
 1. you need to already have a published addon needed to be tested 
+ * you also have to set an enviorment variable named `VAR_USER` on your machine with your own var user
 2. to create test files enter 'server-side' folder - run the CLI command `npm run create-test server-side {addonUUID}` while {addonUUID} is the tested addon UUID
  * this will create a service file inside `server-side\tests\api_tests\services` and a test file inside `server-side\tests\api_tests` - by the name of given addon, you can search these files by searching addons UUID
  * you can alreay call these by:
