@@ -61,14 +61,15 @@ program.command('server-side')
         addonName = camelize(addonName.toLowerCase());
         // 1. create a new test service
         let serviceClassName = `${addonName.charAt(0).toUpperCase() + addonName.slice(1)}`;
+        let testClassName = `${addonName.charAt(0).toUpperCase() + addonName.slice(1)}`;
         const newServiceFileName = `${serviceLoaction}/${serviceClassName}.service.ts`;
         copyFileAndChangeContent(templateServicePath, 'TemplateService', `${serviceClassName}Service`, newServiceFileName);
         // 1.2. add the tested addon UUID as a comment at the top of the file
         addContentStartOfFile(`//${addonUUID}`, newServiceFileName);
         serviceClassName = `${serviceClassName}Service`;
         //2. create a new test file for requested addon
-        const newTestFileName = `./tests/api_tests/${addonName}.test.ts`;
-        copyFileAndChangeContent(templateTestPath, 'TemplateTests', addonName, newTestFileName);
+        const newTestFileName = `./tests/api_tests/${testClassName}.test.ts`;
+        copyFileAndChangeContent(templateTestPath, 'TemplateTests', testClassName, newTestFileName);
         //2.1. add service import on top of the test file
         const servicePathToImport = `./services/${addonName}.service`;
         let newServiceImport = templateServiceImport.replace(/Path/, servicePathToImport);
@@ -87,12 +88,12 @@ program.command('server-side')
         const addonUUIDNameMapping = `"${addonUUID}":"${addonName}",\n\t"templateLine":"Template"`;
         copyFileAndChangeContent(addonUUIDMapper, `"templateLine":"Template"`, addonUUIDNameMapping, addonUUIDMapper);
         //3. add the new test file to this addon endpoint
-        let newEndpoint = endpointToAddTemplate.replace(/template_test_endpoint/g, camelToSnakeCase(addonName));
-        newEndpoint = newEndpoint.replace(/TemplateTests/g, addonName);
-        newEndpoint = newEndpoint.replace(/Fill_Test_Name_Here/g, addonName);
+        let newEndpoint = endpointToAddTemplate.replace(/template_test_endpoint/g, camelToSnakeCase(testClassName));
+        newEndpoint = newEndpoint.replace(/TemplateTests/g, testClassName);
+        newEndpoint = newEndpoint.replace(/Fill_Test_Name_Here/g, testClassName);
         AddContentToFile(serverSideTestsEndpointsLocation, newEndpoint);
         //3.1. add import to new test function to work in test endpoints
-        const newTestImportLine = templateTestImport.replace(/Template/g, addonName);
+        const newTestImportLine = templateTestImport.replace(/Template/g, testClassName);
         addContentStartOfFile(newTestImportLine, serverSideTestsEndpointsLocation);
     });
 

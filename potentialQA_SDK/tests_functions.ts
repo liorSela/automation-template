@@ -1,9 +1,6 @@
+import { ActivityDataIndex } from '../server-side/tests/api_tests/ActivityDataIndex.test';
 import GeneralService, { TesterFunctions } from '../potentialQA_SDK/server_side/general.service';
 import { Client, Request } from '@pepperi-addons/debug-server';
-
-import {
-    DataIndexTests,
-} from '../server-side/tests/api_tests/data_index.test';
 
 import {
     TemplateTests,
@@ -39,7 +36,7 @@ function mapUuidToTestName(addonUUID: string): string {
             return camelToSnakeCase(value) as string;
         }
     }
-    return "";//TODO: what should be done here?
+    return "";
 }
 
 function camelToSnakeCase(str) {
@@ -62,22 +59,6 @@ export async function template_test_endpoint(client: Client, request: Request, t
     return (await testerFunctions.run());
 }
 
-
-/**
- * this is an example you can immediately run - a true full Automation test fromm the automation framework
- * all you have to do is take the 'Run local data_index test' from 'automation_assets/automation_template.postman_collection.json' & run via postman
- */
-export async function data_index(client: Client, request, testerFunctions: TesterFunctions) {
-    debugger;
-    const service = new GeneralService(client);
-    testName = 'Data_Index';
-    service.PrintMemoryUseToLog('Start', testName);
-    testerFunctions = service.initiateTesterFunctions(client, testName);
-    await DataIndexTests(service, request, testerFunctions);
-    await test_data(client, testerFunctions);
-    return (await testerFunctions.run());
-}
-
 //this function is infra function to print addon versions - DO NOT TOUCH
 export async function test_data(client: Client, testerFunctions: TesterFunctions) {
     const service = new GeneralService(client);
@@ -95,3 +76,18 @@ export async function test_data(client: Client, testerFunctions: TesterFunctions
         return TestDataTests(service, testerFunctions);
     }
 }
+
+/**
+ * this is an example you can immediately run - a true full Automation test fromm the automation framework
+ * all you have to do is take the 'Run local data_index test' from 'automation_assets/automation_template.postman_collection.json' & run via postman
+ */
+export async function activity_data_index(client: Client, request: Request, testerFunctions: TesterFunctions) {
+    const service = new GeneralService(client);
+    testName = 'ActivityDataIndex'; //printing your test name - done for logging
+    service.PrintMemoryUseToLog('Start', testName);
+    testerFunctions = service.initiateTesterFunctions(client, testName);
+    await ActivityDataIndex(service, request, testerFunctions);//this is the call to YOUR test function
+    await test_data(client, testerFunctions);//this is done to print versions at the end of test - can be deleted
+    return (await testerFunctions.run());
+};
+context["activity_data_index"] = activity_data_index;

@@ -6,10 +6,17 @@ A template for creating a pepperi automation test using QA team infra
 * create a test file and tests serivce by NPM command - using addon UUID
 * debug the tests in VSC 
 
-
 ## Installation
 ---
 1. run `npm run init` from the root
+
+## Debugging
+---
+To debug your addon in `Visual Studio Code`, press `F5` or `Run->Start Debugging`.
+
+## Sanity Testing That Everything Works
+---
+Once project is installed you can press `F5` to start local debug server, then you can use `Run local ActivityDataIndex test` postman collection from automation_assets to validate project is working - this is an example test from the automation framework.
 
 ## Project structure
 ---
@@ -29,10 +36,6 @@ The node_modules folder is in use by `npm`
 | server-side\tests\api_tests | location of all generated test files |
 | server-side\tests\api_tests\services | location of all generated services files |
 
-## Debugging
----
-To debug your addon in `Visual Studio Code`, press `F5` or `Run->Start Debugging`.
-You can then checkout your *API* at http://localhost:4600/tests/run. Be sure to supply a JWT for it to work.
 
 ## Publishing
 ---
