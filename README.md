@@ -3,7 +3,7 @@
 A template for creating a pepperi automation test using QA team infra
 
 * can run both locally and on the AWS server
-* create a test file and tests serivce by NPM command
+* create a test file and tests serivce by NPM command - using addon UUID
 * debug the tests in VSC 
 
 
@@ -41,5 +41,6 @@ the way I currently see it - no reason to publish this
 
 ## How To Use
 ---
-1. 
----
+1. you need to already have a published addon needed to be tested 
+2. enter 'server-side' folder - run 'npm run create-test server-side <addonUUID>'
+3. 
