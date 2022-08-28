@@ -46,8 +46,8 @@ the way I currently see it - no reason to publish this
  * this will create a service file inside `server-side\tests\api_tests\services` and a test file inside `server-side\tests\api_tests` - by the name of given addon, you can search these files by searching addons UUID
  * you can alreay call these by:
  * pressing `F5` to start the automation local server 
- * once the server is up - you can call tests by sending `POST` to `http://localhost:4600/tests/run` (you can take the postman inside `automation_assets`) just notice you have to have to use a valid pepperi token of a user which already has the addon installed on it inside the `Authorization` header 
+ * once the server is up - you can call tests by sending `POST` to `http://localhost:4600/tests/run` (you can take the postman inside `automation_assets`) just notice you have to use a valid pepperi token of a user which already has the addon installed on it inside the `Authorization` header 
  * you have to also pass `AddonUUID` and `isLocal` inside the body of this call:
-    * `AddonUUID` should be the UUID of the tested addon, while `isLocal` is whether you want to run on local server or AWS
+    * `AddonUUID` - should be the UUID of the tested addon, while `isLocal` - is whether you want to run on local server or AWS
 3. running on local server will mean you have to start your tested addon server locally on 4500 port - then calling the test with `"isLocal":"true"`
 
