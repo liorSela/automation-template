@@ -38,7 +38,6 @@ You can then checkout your *API* at http://localhost:4600/tests/run. Be sure to 
 ## Publishing
 ---
 the way I currently see it - no reason to publish this
----
 
 ## How To Use
 ---
