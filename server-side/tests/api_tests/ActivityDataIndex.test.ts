@@ -1,5 +1,4 @@
 //10979a11-d7f4-41df-8993-f06bfd778304
-import { ObjectsService } from './services/example.objects.service';
 import { ActivityDataIndexService } from './services/ActivityDataIndex.service';
 import GeneralService, { TesterFunctions } from '../../../potentialQA_SDK/server_side/general.service';
 
