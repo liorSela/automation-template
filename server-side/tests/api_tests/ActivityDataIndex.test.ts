@@ -1,11 +1,11 @@
 //10979a11-d7f4-41df-8993-f06bfd778304
 import { ObjectsService } from './services/example.objects.service';
-import { DataIndexService } from '../../../potentialQA_SDK/server_side/data-index.service';
+import { ActivityDataIndexService  } from './services/ActivityDataIndex.service';
 import GeneralService, { TesterFunctions } from '../../../potentialQA_SDK/server_side/general.service';
 
 export async function ActivityDataIndex(generalService: GeneralService, request, tester: TesterFunctions) {
     const objectsService = new ObjectsService(generalService);
-    const dataIndexService = new DataIndexService(generalService);
+    const dataIndexService = new ActivityDataIndexService(generalService);
 
     const _MAX_LOOPS = 10;
     const _INTERVAL_TIMER = 5000;

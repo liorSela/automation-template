@@ -2,10 +2,6 @@ import { ActivityDataIndex } from '../server-side/tests/api_tests/ActivityDataIn
 import GeneralService, { TesterFunctions } from '../potentialQA_SDK/server_side/general.service';
 import { Client, Request } from '@pepperi-addons/debug-server';
 
-import {
-    TemplateTests,
-} from '../server-side/tests/api_tests/template.test';
-
 import { TestDataTests } from '../potentialQA_SDK/server_side/serverInfra.index';
 import fs from 'fs';
 
@@ -42,22 +38,6 @@ function mapUuidToTestName(addonUUID: string): string {
 function camelToSnakeCase(str) {
     return (str.split(/(?=[A-Z])/).join('_').toLowerCase());
 }
-/**
- * please notice: this test wont run unless you'll change everything needed
- * @param client the client object which received from user 
- * @param request HTTP request received from user
- * @param testerFunctions mocha functions passed from infra 
- * @returns tests result
- */
-export async function template_test_endpoint(client: Client, request: Request, testerFunctions: TesterFunctions) {
-    const service = new GeneralService(client);
-    testName = 'Fill_Test_Name_Here'; //1st thing has to change: this is done for printing: fill your test name here
-    service.PrintMemoryUseToLog('Start', testName);
-    testerFunctions = service.initiateTesterFunctions(client, testName);
-    await TemplateTests(service, request, testerFunctions);//2nd thing has to change: this should be replaced by your testing function
-    await test_data(client, testerFunctions);
-    return (await testerFunctions.run());
-}
 
 //this function is infra function to print addon versions - DO NOT TOUCH
 export async function test_data(client: Client, testerFunctions: TesterFunctions) {
@@ -91,3 +71,6 @@ export async function activity_data_index(client: Client, request: Request, test
     return (await testerFunctions.run());
 };
 context["activity_data_index"] = activity_data_index;
+
+
+

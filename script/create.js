@@ -7,8 +7,8 @@ const { exit } = require('process');
 const cwd = process.cwd();
 
 
-const templateTestPath = "../server-side/tests/api_tests/template.test.ts";
-const templateServicePath = "../server-side/tests/api_tests/services/template.service.ts";
+const templateTestPath = "../potentialQA_SDK/templates/template.test.txt";//../server-side/tests/api_tests/template.test.ts
+const templateServicePath = "../potentialQA_SDK/templates/template.service.txt";//../server-side/tests/api_tests/services/template.service.ts
 const serviceLoaction = "../server-side/tests/api_tests/services";
 const endpointToAddTemplate = `
 export async function template_test_endpoint(client: Client, request: Request, testerFunctions: TesterFunctions) {
@@ -24,7 +24,7 @@ context["template_test_endpoint"] = template_test_endpoint;
 `;
 const templateTestImport = `import { Template } from '../server-side/tests/api_tests/Template.test';`;
 const templateServiceImport = `import { ServiceName } from "Path";`;
-const templateCtorLineToReplace = `//ctor replacment line`;
+//const templateCtorLineToReplace = `//ctor replacment line`;
 const abc = `const service = new serviceClass(generalService);`;
 
 const addonUUIDMapper = '../potentialQA_SDK/mapper.json';
