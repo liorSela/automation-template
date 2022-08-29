@@ -12,6 +12,7 @@
     "allowJs": true,
     "resolveJsonModule": true,
     "noImplicitThis": false,
+    "preserveSymlinks":true
   },
   "exclude": [
     "./build/**",
