@@ -38,8 +38,6 @@ export async function TestDataTests(
     const installedAddonsArr = await service.getInstalledAddons({ page_size: -1 });
     for (let index = 0; index < installedAddonsArr.length; index++) {
         if (installedAddonsArr[index].Addon !== null) {
-            if (installedAddonsArr[index].Addon.Name == 'API Testing Framework')
-                installedAddons['API Testing Framework'] = installedAddonsArr[index].Version;
             if (installedAddonsArr[index].Addon.Name == 'Services Framework')
                 installedAddons['Services Framework'] = installedAddonsArr[index].Version;
             if (installedAddonsArr[index].Addon.Name == 'Cross Platforms API')
@@ -56,20 +54,12 @@ export async function TestDataTests(
                 installedAddons['Data Views API'] = installedAddonsArr[index].Version;
             if (installedAddonsArr[index].Addon.Name == 'ADAL')
                 installedAddons['ADAL'] = installedAddonsArr[index].Version;
-            if (installedAddonsArr[index].Addon.Name == 'Automated Jobs')
-                installedAddons['Automated Jobs'] = installedAddonsArr[index].Version;
             if (installedAddonsArr[index].Addon.Name == 'Relations Framework')
                 installedAddons['Relations Framework'] = installedAddonsArr[index].Version;
             if (installedAddonsArr[index].Addon.Name == 'Object Types Editor')
                 installedAddons['Object Types Editor'] = installedAddonsArr[index].Version;
             if (installedAddonsArr[index].Addon.Name == 'Pepperi Notification Service')
                 installedAddons['Pepperi Notification Service'] = installedAddonsArr[index].Version;
-            if (installedAddonsArr[index].Addon.Name == 'Item Trade Promotions')
-                installedAddons['Item Trade Promotions'] = installedAddonsArr[index].Version;
-            if (installedAddonsArr[index].Addon.Name == 'Order Trade Promotions')
-                installedAddons['Order Trade Promotions'] = installedAddonsArr[index].Version;
-            if (installedAddonsArr[index].Addon.Name == 'Package Trade Promotions')
-                installedAddons['Package Trade Promotions'] = installedAddonsArr[index].Version;
         }
     }
 
