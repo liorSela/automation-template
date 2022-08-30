@@ -1,12 +1,12 @@
 {
 	"info": {
-		"_postman_id": "b4c471e3-8581-415c-ae02-b97dcd6771b8",
-		"name": "forTemplate",
+		"_postman_id": "0ce1e7bc-45ca-4791-8447-82fce0f82036",
+		"name": "run test",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"item": [
 		{
-			"name": "Run local test template",
+			"name": "Run Local Test",
 			"event": [
 				{
 					"listen": "test",
@@ -93,7 +93,7 @@
 			"response": []
 		},
 		{
-			"name": "Run local ActivityDataIndex test",
+			"name": "Run Local Example Test",
 			"event": [
 				{
 					"listen": "test",
