@@ -71,6 +71,3 @@ export async function activity_data_index(client: Client, request: Request, test
     return (await testerFunctions.run());
 };
 context["activity_data_index"] = activity_data_index;
-
-
-
