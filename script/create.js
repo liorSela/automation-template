@@ -37,31 +37,17 @@ program
 program.command('server-side')
     .description('Create a template for server side test')
     .argument('<addonUUID>', 'tested addon UUID')
+    .argument('<testName>', 'the name of the test will be created')
     //   .option('--first', 'display just the first substring')
     //   .option('-s, --separator <char>', 'separator character', ',')
-    .action(async (addonUUID) => {
-        if(isAddonAlreadyTested(addonUUID)){
-            console.log(`Error: The Addon ${addonUUID} Is Already Has Its Test File - Search For '${addonUUID}' in VSC search`);
-            exit(1);
-        }
-        if (!process.env.VAR_USER) {
-            console.log(`Error: VAR_USER Env Variable Is Not Configured!`);
-            exit(1);
-        }
-        const varUser = process.env.VAR_USER;
-        let res;
-        try {
-            res = await (getAddonNameByUUID(addonUUID, varUser));
-        } catch (e) {
-            console.log(`Error: Cannot Receive Addon Name By Given UUID: ${(e)}`);
-            exit(1);
-        }
-        let addonName = res[0].Name;
-        console.log(`Addon Name Received For Provided UUID: ${addonUUID} is: ${addonName}`);
-        addonName = camelize(addonName.toLowerCase());
+    .action(async (addonUUID, testName) => {
+        console.log(`${addonUUID} --- ${testName}`);
+        validateAddonUUID(addonUUID);
+        isAddonAlreadyTested(addonUUID, testName);
+        addonName = camelize(testName.toLowerCase());
         // 1. create a new test service
-        let serviceClassName = `${addonName.charAt(0).toUpperCase() + addonName.slice(1)}`;
-        let testClassName = `${addonName.charAt(0).toUpperCase() + addonName.slice(1)}`;
+        let serviceClassName = `${testName.charAt(0).toUpperCase() + testName.slice(1)}`;
+        let testClassName = `${testName.charAt(0).toUpperCase() + testName.slice(1)}`;
         const newServiceFileName = `${serviceLoaction}/${serviceClassName}.service.ts`;
         copyFileAndChangeContent(templateServicePath, 'TemplateService', `${serviceClassName}Service`, newServiceFileName);
         // 1.2. add the tested addon UUID as a comment at the top of the file
@@ -74,18 +60,18 @@ program.command('server-side')
         const servicePathToImport = `./services/${addonName}.service`;
         let newServiceImport = templateServiceImport.replace(/Path/, servicePathToImport);
         newServiceImport = newServiceImport.replace(/ServiceName/, `${serviceClassName}`);
-        const pathToTestFile = `../server-side/tests/api_tests/${addonName}.test.ts`;
+        const pathToTestFile = `../server-side/tests/api_tests/${testName}.test.ts`;
         addContentStartOfFile(newServiceImport, pathToTestFile);
         //2.2. add the tested addon UUID as a comment at the top of the file
         addContentStartOfFile(`//${addonUUID}`, pathToTestFile);
         //2.3 replace template line with new service ctor
         let newCtorToTemplate = abc.replace(/service/, `${addonName}Service`);
-        newCtorToTemplate = newCtorToTemplate.replace(/serviceClass/, `${addonName.charAt(0).toUpperCase() + addonName.slice(1)}Service`);
+        newCtorToTemplate = newCtorToTemplate.replace(/serviceClass/, `${testClassName}Service`);
         // console.log(newCtorToTemplate);
         copyFileAndChangeContent(pathToTestFile, '//templateToTeplaceWithCtor', newCtorToTemplate, pathToTestFile);
         //3.add addon name to map to addon UUID inside 'mapper.json'
-        //uuid:name
-        const addonUUIDNameMapping = `"${addonUUID}":"${addonName}",\n\t"templateLine":"Template"`;
+        // //uuid:name
+        const addonUUIDNameMapping = `"${addonUUID}":"${testClassName}",\n\t"templateLine":"Template"`;
         copyFileAndChangeContent(addonUUIDMapper, `"templateLine":"Template"`, addonUUIDNameMapping, addonUUIDMapper);
         //3. add the new test file to this addon endpoint
         let newEndpoint = endpointToAddTemplate.replace(/template_test_endpoint/g, camelToSnakeCase(testClassName));
@@ -142,21 +128,13 @@ function addContentStartOfFile(textToAdd, fileToAddTo) {
     fs.writeFileSync(fileToAddTo, endpointFileSplitted.join('\n'));
 }
 
-async function getAddonNameByUUID(addonUUID, VARuser) {
-    if (addonUUID.length !== 36) {
+async function validateAddonUUID(addonUUID) {
+    if (addonUUID.length < 36) {
         throw `Provided UUID Is Too Short: '${addonUUID}'`;
     }
-    const base64Credentials = Buffer.from(VARuser).toString('base64');
-    const response = await fetch(`https://papi.pepperi.com/V1.0/var/addons?where=UUID='${addonUUID}'`, {
-        headers: {
-            Authorization: `Basic ` + base64Credentials,
-        }
-    });
-    const responseJson = await response.json();
-    if (responseJson.length < 1) {
-        throw `No Addons Returned For The Provided UUID '${addonUUID}'`;
+    if (addonUUID.length > 36) {
+        throw `Provided UUID Is Too Long: '${addonUUID}'`;
     }
-    return responseJson;
 }
 
 function camelize(str) {
@@ -165,12 +143,16 @@ function camelize(str) {
     }).replace(/\s+/g, '');
 }
 
-function isAddonAlreadyTested(addonUUID){
+function isAddonAlreadyTested(addonUUID, testName) {
     let addonUUIDMapper = JSON.parse(fs.readFileSync("../potentialQA_SDK/mapper.json", 'utf-8'));
-    for (let [key, _] of Object.entries(addonUUIDMapper)) {
-        if (key === addonUUID) {
-            return true;
+    for (let [uuid, nameOfTest] of Object.entries(addonUUIDMapper)) {
+        if (nameOfTest === testName) {
+            if (uuid === addonUUID) {
+                throw Error(`this test name already exists for the same addon uuid - search ${addonUUID} inside the IDE`);
+            }
+            else {
+                throw Error(`this test name already exists for the addon uuid - ${addonUUID}`);
+            }
         }
     }
-    return false;
 }

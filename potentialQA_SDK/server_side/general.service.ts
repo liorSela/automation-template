@@ -450,18 +450,24 @@ export default class GeneralService {
                 loopsAmount--;
             }
             //This case will only retry the get call again as many times as the "loopsAmount"
-            else if (auditLogResponse.Status.ID == '2') {
+            else if (auditLogResponse.Status.ID == '2' || auditLogResponse.Status.ID == '5') {
                 this.sleep(2000);
                 console.log(
-                    '%cIn_Progres: Status ID is 2, Retry ' + loopsAmount + ' Times.',
+                    `%c${auditLogResponse.Status.ID === 2 ? 'In_Progres' : 'Started'}: Status ID is ${
+                        auditLogResponse.Status.ID
+                    }, Retry ${loopsAmount} Times.`,
                     ConsoleColors.Information,
                 );
                 loopsAmount--;
             }
-        } while ((auditLogResponse === null || auditLogResponse.Status.ID == '2') && loopsAmount > 0);
+        } while (
+            (auditLogResponse === null || auditLogResponse.Status.ID == '2' || auditLogResponse.Status.ID == '5') &&
+            loopsAmount > 0
+        );
 
         //Check UUID
         try {
+            // debugger;
             if (
                 auditLogResponse.DistributorUUID == auditLogResponse.UUID ||
                 auditLogResponse.DistributorUUID == auditLogResponse.Event.User.UUID ||
@@ -479,6 +485,7 @@ export default class GeneralService {
 
         //Check Date and Time
         try {
+            // debugger;
             if (
                 !auditLogResponse.CreationDateTime.includes(new Date().toISOString().split('T')[0] && 'Z') ||
                 !auditLogResponse.ModificationDateTime.includes(new Date().toISOString().split('T')[0] && 'Z')
@@ -493,6 +500,7 @@ export default class GeneralService {
         }
         //Check Type and Event
         try {
+            // debugger;
             if (
                 (auditLogResponse.AuditType != 'action' && auditLogResponse.AuditType != 'data') ||
                 (auditLogResponse.Event.Type != 'code_job_execution' &&
@@ -505,6 +513,7 @@ export default class GeneralService {
                 throw new Error('Error in Type and Event in Audit Log API Response');
             }
         } catch (error) {
+            debugger;
             if (error instanceof Error) {
                 error.stack = 'Type and Event in Audit Log API Response:\n' + error.stack;
             }
