@@ -1,5 +1,5 @@
 import GeneralService, { TesterFunctions } from '../../../potentialQA_SDK/server_side/general.service';
-import { ObjectsService } from './services/example.objects.service';
+import { ObjectsService } from './services/Objects.example.service';
 
 
 export async function UsersTests(generalService: GeneralService, addonService: GeneralService, request, tester: TesterFunctions) {
@@ -8,7 +8,7 @@ export async function UsersTests(generalService: GeneralService, addonService: G
     const expect = tester.expect;
     const it = tester.it;
 
-    describe('Users Test Suites', () => {
+    describe('Users Test: Example Test Suite', () => {
         let currentUserQuantity;
         let initialUsersList;
         let createdUser;
@@ -18,7 +18,7 @@ export async function UsersTests(generalService: GeneralService, addonService: G
         // const schemaName = 'PNS Objects Test';
         // const _MAX_LOOPS = 12;
 
-        it('Get initial user quantity and verify user object', async () => {
+        it('Example Test: Get initial user quantity and verify user object', async () => {
             initialUsersList = await service.getUsers();
             expect(initialUsersList).to.be.an('array').with.lengthOf.above(0);
             expect(initialUsersList[0], 'InternalID')
@@ -48,7 +48,7 @@ export async function UsersTests(generalService: GeneralService, addonService: G
                 (currentUserQuantity = initialUsersList.length);
         });
 
-        it('Verify GET optional fields', async () => {
+        it('Example Test: Verify GET optional fields', async () => {
             const optionalUsersFields = await service.getUsers({
                 fields: [
                     'Name',
@@ -79,7 +79,7 @@ export async function UsersTests(generalService: GeneralService, addonService: G
                 .to.have.property('SecurityGroupName')
                 .that.is.a('string').and.is.not.empty;
         });
-        it('Create User', async () => {
+        it('Example Test: Create User', async () => {
             userExternalID = 'Automated API User ' + Math.floor(Math.random() * 1000000).toString();
             userEmail =
                 'Email' +
@@ -225,7 +225,7 @@ export async function UsersTests(generalService: GeneralService, addonService: G
             const newQuantity = (await service.getUsers()).length;
             expect(newQuantity == currentUserQuantity + 1);
         });
-        it('Update User', async () => {
+        it('Example Test: Update User', async () => {
             updatedUser = await service.updateUser({
                 ExternalID: userExternalID,
                 Email: userEmail,

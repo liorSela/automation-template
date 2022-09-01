@@ -72,8 +72,8 @@ program.command('server-side')
         copyFileAndChangeContent(pathToTestFile, '//templateToTeplaceWithCtor', newCtorToTemplate, pathToTestFile);
         copyFileAndChangeContent(pathToTestFile, 'servicez', `${addonName}Service`, pathToTestFile);
         //3.add addon name to map to addon UUID inside 'mapper.json'
-        // //uuid:name
-        const addonUUIDNameMapping = `"${addonUUID}":"${testClassName}",\n\t"templateLine":"Template"`;
+        // //name:uuid
+        const addonUUIDNameMapping = `"${testClassName}":"${addonUUID}",\n\t"templateLine":"Template"`;
         copyFileAndChangeContent(addonUUIDMapper, `"templateLine":"Template"`, addonUUIDNameMapping, addonUUIDMapper);
         //3. add the new test file to this addon endpoint
         let newEndpoint = endpointToAddTemplate.replace(/template_test_endpoint/g, camelToSnakeCase(testClassName));
@@ -147,7 +147,7 @@ function camelize(str) {
 
 function isAddonAlreadyTested(addonUUID, testName) {
     let addonUUIDMapper = JSON.parse(fs.readFileSync("../potentialQA_SDK/mapper.json", 'utf-8'));
-    for (let [uuid, nameOfTest] of Object.entries(addonUUIDMapper)) {
+    for (let [nameOfTest, uuid] of Object.entries(addonUUIDMapper)) {
         if (nameOfTest.toLowerCase() === testName.toLowerCase()) {
             if (uuid === addonUUID) {
                 throw Error(`this test name already exists for the same addon uuid - search ${addonUUID} inside the IDE`);

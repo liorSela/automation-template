@@ -7,10 +7,10 @@ export async function TemplateTests(generalService: GeneralService, addonService
     const expect = tester.expect;
     const it = tester.it;
 
-    describe('TemplateTests Suites', () => {//the string inside the desribes will effect the report - name should be changed
+    describe('TemplateTests Suites', () => { //the string inside the describe will effect the title of this suite in the report
             //templateToTeplaceWithCtor
-            let createdUser;
-            it('Basic Test Example #1: Create User Using Service', async () => {
+            let createdUser; // global vars for whole test (used in more than 1 'it') should be created here
+            it('Basic Test Example #1: Create User Using Service', async () => { //this will set the test name in report
                 // This Is An Example Of How To Write Tests - Using Example Service From Automation Infra - Objects
                 /**
                  * your code should replace this
