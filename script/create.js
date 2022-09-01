@@ -11,12 +11,13 @@ const templateTestPath = "../potentialQA_SDK/templates/template.test.txt";//../s
 const templateServicePath = "../potentialQA_SDK/templates/template.service.txt";//../server-side/tests/api_tests/services/template.service.ts
 const serviceLoaction = "../server-side/tests/api_tests/services";
 const endpointToAddTemplate = `
-export async function template_test_endpoint(client: Client, request: Request, testerFunctions: TesterFunctions) {
+export async function template_test_endpoint(client: Client, addonClient: Client, request: Request, testerFunctions: TesterFunctions) {
     const service = new GeneralService(client);
+    const serviceAddon = new GeneralService(addonClient);
     testName = 'Fill_Test_Name_Here'; //printing your test name - done for logging
     service.PrintMemoryUseToLog('Start', testName);
     testerFunctions = service.initiateTesterFunctions(client, testName);
-    await TemplateTests(service, request, testerFunctions);//this is the call to YOUR test function
+    await TemplateTests(service, serviceAddon, request, testerFunctions);//this is the call to YOUR test function
     await test_data(client, testerFunctions);//this is done to print versions at the end of test - can be deleted
     return (await testerFunctions.run());
 };
@@ -25,7 +26,7 @@ context["template_test_endpoint"] = template_test_endpoint;
 const templateTestImport = `import { Template } from '../server-side/tests/api_tests/Template.test';`;
 const templateServiceImport = `import { ServiceName } from "Path";`;
 //const templateCtorLineToReplace = `//ctor replacment line`;
-const abc = `const service = new serviceClass(generalService);`;
+const abc = `const service = new serviceClass(generalService, addonService.papiClient);`;
 
 const addonUUIDMapper = '../potentialQA_SDK/mapper.json';
 const serverSideTestsEndpointsLocation = '../potentialQA_SDK/tests_functions.ts';
@@ -69,6 +70,7 @@ program.command('server-side')
         newCtorToTemplate = newCtorToTemplate.replace(/serviceClass/, `${testClassName}Service`);
         // console.log(newCtorToTemplate);
         copyFileAndChangeContent(pathToTestFile, '//templateToTeplaceWithCtor', newCtorToTemplate, pathToTestFile);
+        copyFileAndChangeContent(pathToTestFile, 'servicez', `${addonName}Service`, pathToTestFile);
         //3.add addon name to map to addon UUID inside 'mapper.json'
         // //uuid:name
         const addonUUIDNameMapping = `"${addonUUID}":"${testClassName}",\n\t"templateLine":"Template"`;

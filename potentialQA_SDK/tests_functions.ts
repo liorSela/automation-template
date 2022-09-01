@@ -1,4 +1,4 @@
-import { ActivityDataIndex } from '../server-side/tests/api_tests/ActivityDataIndex.test';
+import { ObjectUsers } from '../server-side/tests/api_tests/ObjectUsers.test';
 import GeneralService, { TesterFunctions } from '../potentialQA_SDK/server_side/general.service';
 import { Client, Request } from '@pepperi-addons/debug-server';
 
@@ -19,10 +19,11 @@ export async function runTest(addonUUID: string, client: Client, request, tester
     if (request.body.isLocal === undefined) {
         throw Error("Error: isLocal is Mandatory Field Inside Test Request Body");
     }
+    const addonService = client;
     if (request.body.isLocal === "true") {
-        client.BaseURL = "http://localhost:4500";
+        addonService.BaseURL = "http://localhost:4500";
     }
-    return await context[functionName].apply(this, [client, request, testerFunctions]);
+    return await context[functionName].apply(this, [client, addonService, request, testerFunctions]);
 }
 
 function mapUuidToTestName(addonUUID: string): string {
@@ -61,13 +62,14 @@ export async function test_data(client: Client, testerFunctions: TesterFunctions
  * this is an example you can immediately run - a true full Automation test fromm the automation framework
  * all you have to do is take the 'Run local data_index test' from 'automation_assets/automation_template.postman_collection.json' & run via postman
  */
-export async function activity_data_index(client: Client, request: Request, testerFunctions: TesterFunctions) {
-    const service = new GeneralService(client);
-    testName = 'ActivityDataIndex'; //printing your test name - done for logging
-    service.PrintMemoryUseToLog('Start', testName);
-    testerFunctions = service.initiateTesterFunctions(client, testName);
-    await ActivityDataIndex(service, request, testerFunctions);//this is the call to YOUR test function
+export async function object_users(client: Client, addonClient: Client, request: Request, testerFunctions: TesterFunctions) {
+    const systemService = new GeneralService(client);
+    const addonService = new GeneralService(addonClient);
+    testName = 'ObjectUsers'; //printing your test name - done for logging
+    systemService.PrintMemoryUseToLog('Start', testName);
+    testerFunctions = systemService.initiateTesterFunctions(client, testName);
+    await ObjectUsers(systemService, addonService, request, testerFunctions);//this is the call to YOUR test function
     await test_data(client, testerFunctions);//this is done to print versions at the end of test - can be deleted
     return (await testerFunctions.run());
 };
-context["activity_data_index"] = activity_data_index;
+context["object_users"] = object_users;
