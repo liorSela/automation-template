@@ -148,7 +148,7 @@ function camelize(str) {
 function isAddonAlreadyTested(addonUUID, testName) {
     let addonUUIDMapper = JSON.parse(fs.readFileSync("../potentialQA_SDK/mapper.json", 'utf-8'));
     for (let [uuid, nameOfTest] of Object.entries(addonUUIDMapper)) {
-        if (nameOfTest === testName) {
+        if (nameOfTest.toLowerCase() === testName.toLowerCase()) {
             if (uuid === addonUUID) {
                 throw Error(`this test name already exists for the same addon uuid - search ${addonUUID} inside the IDE`);
             }
