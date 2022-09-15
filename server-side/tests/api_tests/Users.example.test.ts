@@ -132,12 +132,13 @@ export async function UsersTests(generalService: GeneralService, addonService: G
             });
             expect(createdUser, 'Role').to.have.property('Role');
             expect(createdUser, 'SecurityGroup').to.have.property('SecurityGroup').that.is.an('object');
-            expect(createdUser.SecurityGroup, 'SecurityGroup data').to.deep.equal({
-                Data: {
-                    UUID: securityGroups[0].securityGroupID,
-                    Name: securityGroups[0].name,
-                },
+            let isSecGroupFound = false;
+            securityGroups.forEach(securityGroup => {
+                if (securityGroup.securityGroupID === createdUser.SecurityGroup.Data.UUID && securityGroup.name === createdUser.SecurityGroup.Data.Name) {
+                    isSecGroupFound = true;
+                }
             });
+            expect(isSecGroupFound).to.be.true;
 
             const getCreatedUserOptional = await service.getUsers({
                 where: `InternalID='${createdUser.InternalID}'`,
@@ -163,15 +164,12 @@ export async function UsersTests(generalService: GeneralService, addonService: G
                 .to.have.property('IsSupportAdminUser')
                 .that.is.a('boolean');
             expect(getCreatedUserOptional[0], 'IsUnderMyRole').to.have.property('IsUnderMyRole').that.is.a('boolean');
-            expect(getCreatedUserOptional[0], 'SecurityGroupUUID')
-                .to.have.property('SecurityGroupUUID')
-                .that.is.a('string')
-                .and.equals(securityGroups[0].securityGroupID);
-            expect(getCreatedUserOptional[0], 'SecurityGroupName')
-                .to.have.property('SecurityGroupName')
-                .that.is.a('string')
-                .and.equals(securityGroups[0].name);
-
+            isSecGroupFound = false;
+            securityGroups.forEach(securityGroup => {
+                if (securityGroup.securityGroupID === (getCreatedUserOptional[0] as any).SecurityGroupUUID && securityGroup.name === (getCreatedUserOptional[0] as any).SecurityGroupName) {
+                    isSecGroupFound = true;
+                }
+            });
             const getCreatedUser = await service.getUsers({ where: `InternalID='${createdUser.InternalID}'` });
             expect(getCreatedUser[0], 'InternalID')
                 .to.have.property('InternalID')

@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "0ce1e7bc-45ca-4791-8447-82fce0f82036",
+		"_postman_id": "de5c93e4-2aad-4b33-980e-4a794f38288e",
 		"name": "run test",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -157,7 +157,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"AddonUUID\":\"10979a11-d7f4-41df-8993-f06bfd778304\",\r\n    \"isLocal\":\"false\" \r\n}",
+					"raw": "{\r\n    \"AddonUUID\":\"04de9428-8658-4bf7-8171-b59f6327bbf1\",\r\n    \"isLocal\":\"false\" \r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
