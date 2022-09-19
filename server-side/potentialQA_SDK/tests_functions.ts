@@ -32,7 +32,7 @@ export async function runTest(addonUUID: string, client: Client, request, tester
 
 function mapUuidToTestName(addonUUID: string): string[] {
     let allAddonMatchingNames: string[] = [];
-    let addonUUIDMapper = JSON.parse(fs.readFileSync('../potentialQA_SDK/mapper.json', 'utf-8'));
+    let addonUUIDMapper = JSON.parse(fs.readFileSync('./potentialQA_SDK/mapper.json', 'utf-8'));
     for (let [key, value] of Object.entries(addonUUIDMapper)) {
         if (value === addonUUID) {
             allAddonMatchingNames.push(camelToSnakeCase(key) as string);
