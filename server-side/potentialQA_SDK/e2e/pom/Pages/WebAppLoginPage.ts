@@ -1,6 +1,6 @@
 import { Browser } from '../../utilities/browser';
 import { Page } from './base/Page';
-import config from '../../../../server-side/config';
+import config from '../../../../config';
 import { By } from 'selenium-webdriver';
 import chai, { expect } from 'chai';
 import promised from 'chai-as-promised';

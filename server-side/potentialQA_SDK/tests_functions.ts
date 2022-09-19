@@ -1,4 +1,4 @@
-import { SchemaExtensions } from '../server-side/tests/api_tests/SchemaExtensions.test';
+import { SchemaExtensions } from '../tests/api_tests/SchemaExtensions.test';
 import GeneralService, { TesterFunctions } from '../potentialQA_SDK/server_side/general.service';
 import { Client, Request } from '@pepperi-addons/debug-server';
 

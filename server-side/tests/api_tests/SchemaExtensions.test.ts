@@ -1,6 +1,6 @@
 //00000000-0000-0000-0000-00000000ada1
 import { SchemaExtensionsService } from "./services/SchemaExtensions.service";
-import GeneralService, { TesterFunctions } from "../../../potentialQA_SDK/server_side/general.service";
+import GeneralService, { TesterFunctions } from "../../potentialQA_SDK/server_side/general.service";
 
 export async function SchemaExtensions(generalService: GeneralService, addonService: GeneralService, request, tester: TesterFunctions) {
     //setting 'mocha verbs' to use

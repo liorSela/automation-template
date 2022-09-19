@@ -1,5 +1,5 @@
 import { Browser } from '../../utilities/browser';
-import config from '../../../../server-side/config';
+import config from '../../../../config';
 import { By } from 'selenium-webdriver';
 import { WebAppDialog, WebAppHeader, WebAppList, WebAppTopBar } from '../index';
 import addContext from 'mochawesome/addContext';

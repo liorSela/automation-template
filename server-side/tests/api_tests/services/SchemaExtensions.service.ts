@@ -1,6 +1,6 @@
 // 00000000-0000-0000-0000-00000000ada1
 import { FindOptions, User, PapiClient } from '@pepperi-addons/papi-sdk';
-import GeneralService from '../../../../potentialQA_SDK/server_side/general.service';
+import GeneralService from '../../../potentialQA_SDK/server_side/general.service';
 import * as config from './addon_details.json';
 
 export class SchemaExtensionsService {
