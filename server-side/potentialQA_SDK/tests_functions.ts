@@ -4,7 +4,7 @@ import { Client, Request } from '@pepperi-addons/debug-server';
 
 import { TestDataTests } from '../potentialQA_SDK/server_side/serverInfra.index';
 import fs from 'fs';
-import { UsersTests } from '../server-side/tests/api_tests/Users.example.test';
+import { UsersTests } from '../tests/api_tests/Users.example.test';
 
 let testName = '';
 let context = {};
