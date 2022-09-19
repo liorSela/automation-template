@@ -41,7 +41,7 @@ The node_modules folder is in use by `npm`
 
 ## Publishing
 ---
-the way I currently see it - no reason to publish this as an addon might be changed
+this is now an addon, UUID: 02754342-e0b5-4300-b728-a94ea5e0e8f4, name: automation_template_addon, please talk to me before publishing new version
 
 ## How To Use - Your Addon Is Already Published
 ---
