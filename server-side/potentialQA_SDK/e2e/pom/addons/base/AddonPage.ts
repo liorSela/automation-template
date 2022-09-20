@@ -1,6 +1,6 @@
 import { Browser } from '../../../utilities/browser';
 import { Page } from '../../Pages/base/Page';
-import config from '../../../../../server-side/config';
+import config from '../../../../../config';
 import { By, WebElement, Key } from 'selenium-webdriver';
 import { WebAppHeader } from '../../WebAppHeader';
 import { WebAppHomePage, WebAppList, WebAppSettingsSidePanel } from '../../index';
