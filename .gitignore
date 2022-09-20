@@ -1,5 +1,4 @@
-/publish/api
-/publish/editors
+publish/
 var_sk
 /potentialQA_SDK/node_modules
 **/node_modules/**
@@ -7,4 +6,3 @@ server-side/node_modules
 client-side/node_modules
 /node_modules
 server-side/.rpt2_cache
-server-side/tests/api_tests/services/addon_details.json
