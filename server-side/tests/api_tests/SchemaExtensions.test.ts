@@ -1,9 +1,9 @@
-//00000000-0000-0000-0000-00000000ada1
+// 00000000-0000-0000-0000-00000000ada1
 import { SchemaExtensionsService } from "./services/SchemaExtensions.service";
 import GeneralService, { TesterFunctions } from "../../potentialQA_SDK/server_side/general.service";
 
 export async function SchemaExtensions(generalService: GeneralService, addonService: GeneralService, request, tester: TesterFunctions) {
-    //setting 'mocha verbs' to use
+
     const describe = tester.describe;
     const expect = tester.expect;
     const it = tester.it;
@@ -13,8 +13,11 @@ export async function SchemaExtensions(generalService: GeneralService, addonServ
         const schemaExtensionsService = new SchemaExtensionsService(generalService, addonService.papiClient);
         
         it('Test extending schema is updated on base changes', async () => {
-            const baseSchemaName = getRandomSchemaName();
-            const extendingSchemaName = getRandomSchemaName();
+            const baseSchemaName = generateRandomSchemaName();
+            const extendingSchemaName = generateRandomSchemaName();
+            console.log(`Base schema name: ${baseSchemaName}`);
+            console.log(`Extending schema name: ${extendingSchemaName}`);
+            
             const schemaType = 'data';
             const fieldType = 'String';
 
@@ -42,14 +45,19 @@ export async function SchemaExtensions(generalService: GeneralService, addonServ
             expect(schema.Fields!.field3).to.have.property('Type', fieldType);
             expect(schema.Fields!.field3).to.have.property('ExtendedField', true);
 
-            // Purge
-            await schemaExtensionsService.purgeSchema(baseSchemaName);
-            await schemaExtensionsService.purgeSchema(extendingSchemaName);
+            // Purge schemas and subscriptions
+            try {
+                await schemaExtensionsService.purgeSchema(baseSchemaName);
+                await schemaExtensionsService.purgeSchema(extendingSchemaName);
+                await schemaExtensionsService.hideSubscription(baseSchemaName, extendingSchemaName);
+            } catch {}
         });
 
         it('Test extending schema fails upsert when base is not specified', async () => {
             const baseSchemaName = undefined;
-            const extendingSchemaName = getRandomSchemaName();
+            const extendingSchemaName = generateRandomSchemaName();
+            console.log(`Extending schema name: ${extendingSchemaName}`);
+            
             const schemaType = 'data';
             const fieldType = 'String';
             
@@ -69,8 +77,11 @@ export async function SchemaExtensions(generalService: GeneralService, addonServ
         });
 
         it('Test extending schema fails upsert when base does not exist', async () => {
-            const baseSchemaName = getRandomSchemaName();
-            const extendingSchemaName = getRandomSchemaName();
+            const baseSchemaName = generateRandomSchemaName();
+            const extendingSchemaName = generateRandomSchemaName();
+            console.log(`Base schema name: ${baseSchemaName}`);
+            console.log(`Extending schema name: ${extendingSchemaName}`);
+
             const schemaType = 'data';
             const fieldType = 'String';
 
@@ -91,8 +102,11 @@ export async function SchemaExtensions(generalService: GeneralService, addonServ
         });
 
         it('Test extending schema fails to upsert - fields conflict', async () => {
-            const baseSchemaName = getRandomSchemaName();
-            const extendingSchemaName = getRandomSchemaName();
+            const baseSchemaName = generateRandomSchemaName();
+            const extendingSchemaName = generateRandomSchemaName();
+            console.log(`Base schema name: ${baseSchemaName}`);
+            console.log(`Extending schema name: ${extendingSchemaName}`);
+
             const schemaType = 'data';
             const fieldsNames = ['field1'];
             const fieldType = 'String';
@@ -120,7 +134,7 @@ export async function SchemaExtensions(generalService: GeneralService, addonServ
     });
 }
 
-function getRandomSchemaName(): string {
+function generateRandomSchemaName(): string {
     const randomNumber = Math.floor(Math.random() * 1000000);
     return `testSchema${randomNumber}`;
 }

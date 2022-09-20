@@ -1,7 +1,7 @@
 // 00000000-0000-0000-0000-00000000ada1
 import { FindOptions, User, PapiClient } from '@pepperi-addons/papi-sdk';
 import GeneralService from '../../../potentialQA_SDK/server_side/general.service';
-import * as config from './addon_details.json';
+import jwtDecode from "jwt-decode";
 
 export class SchemaExtensionsService {
 
@@ -13,9 +13,6 @@ export class SchemaExtensionsService {
         this.papiClient = systemService.papiClient; // client which will ALWAYS go OUT
         this.generalService = systemService;
         this.routerClient = addonService; // will run according to passed 'isLocal' flag
-
-        this.papiClient['options'].addonUUID = config.UUID;
-        this.papiClient['options'].addonSecretKey = config.SecretKey;
     }
 
     //this function will ALWAYS call REAL AWS papi
@@ -42,7 +39,7 @@ export class SchemaExtensionsService {
             Type: type,
             Fields: fields,
             Extends: {
-                AddonUUID: config.UUID,
+                AddonUUID: this.papiClient['options'].addonUUID,
                 Name: baseSchemaName
             }
         } as any);
@@ -61,5 +58,18 @@ export class SchemaExtensionsService {
 
     async purgeSchema(name: string) {
         return await this.papiClient.post(`/addons/data/schemes/${name}/purge`, null);
+    }
+
+    async hideSubscription(baseSchemaName: string, extendingSchemaName: string) {
+        const distributorUUID = (jwtDecode(this.papiClient['options'].token)['pepperi.distributoruuid']).toLowerCase();
+        const baseSchemaKey = `${distributorUUID}_${this.papiClient['options'].addonUUID}_${baseSchemaName}`;
+        const extendingSchemaKey = `${distributorUUID}_${this.papiClient['options'].addonUUID}_${extendingSchemaName}`;
+
+        const subscriptionData = {
+            AddonUUID: '00000000-0000-0000-0000-00000000ada1',
+            Name: `${baseSchemaKey}_${extendingSchemaKey}`,
+            Hidden: true
+        };
+       return await this.papiClient.post('/notification/subscriptions', subscriptionData);
     }
 }
