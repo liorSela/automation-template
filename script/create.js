@@ -7,8 +7,8 @@ const { exit } = require('process');
 const cwd = process.cwd();
 
 
-const templateTestPath = "../potentialQA_SDK/templates/template.test.txt";//../server-side/tests/api_tests/template.test.ts
-const templateServicePath = "../potentialQA_SDK/templates/template.service.txt";//../server-side/tests/api_tests/services/template.service.ts
+const templateTestPath = "../server-side/potentialQA_SDK/templates/template.test.txt";//../server-side/tests/api_tests/template.test.ts
+const templateServicePath = "../server-side/potentialQA_SDK/templates/template.service.txt";//../server-side/tests/api_tests/services/template.service.ts
 const serviceLoaction = "../server-side/tests/api_tests/services";
 const endpointToAddTemplate = `
 export async function template_test_endpoint(client: Client, addonClient: Client, request: Request, testerFunctions: TesterFunctions) {
@@ -28,8 +28,8 @@ const templateServiceImport = `import { ServiceName } from "Path";`;
 //const templateCtorLineToReplace = `//ctor replacment line`;
 const abc = `const service = new serviceClass(generalService, addonService.papiClient);`;
 
-const addonUUIDMapper = '../potentialQA_SDK/mapper.json';
-const serverSideTestsEndpointsLocation = '../potentialQA_SDK/tests_functions.ts';
+const addonUUIDMapper = '../server-side/potentialQA_SDK/mapper.json';
+const serverSideTestsEndpointsLocation = '../server-side/potentialQA_SDK/tests_functions.ts';
 program
     .name('test-creator')
     .description('CLI to create tests templates')
@@ -146,7 +146,7 @@ function camelize(str) {
 }
 
 function isAddonAlreadyTested(addonUUID, testName) {
-    let addonUUIDMapper = JSON.parse(fs.readFileSync("../potentialQA_SDK/mapper.json", 'utf-8'));
+    let addonUUIDMapper = JSON.parse(fs.readFileSync("../server-side/potentialQA_SDK/mapper.json", 'utf-8'));
     for (let [nameOfTest, uuid] of Object.entries(addonUUIDMapper)) {
         if (nameOfTest.toLowerCase() === testName.toLowerCase()) {
             if (uuid === addonUUID) {
