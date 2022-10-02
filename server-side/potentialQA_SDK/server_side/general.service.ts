@@ -184,7 +184,7 @@ export default class GeneralService {
         this.papiClient = new PapiClient({
             baseURL: client.BaseURL,
             token: client.OAuthAccessToken,
-            addonUUID: client.AddonUUID.length > 10 ? client.AddonUUID : 'eb26afcd-3cf2-482e-9ab1-b53c41a6adbe',
+            addonUUID: client.AddonUUID.length > 10 ? client.AddonUUID : '02754342-e0b5-4300-b728-a94ea5e0e8f4',
             addonSecretKey: client.AddonSecretKey,
         });
         this.adalService = new ADALService(this.papiClient);
