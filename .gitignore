@@ -1,5 +1,4 @@
-/publish/api
-/publish/editors
+publish/
 var_sk
 /potentialQA_SDK/node_modules
 **/node_modules/**

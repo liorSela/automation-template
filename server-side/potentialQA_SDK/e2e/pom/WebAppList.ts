@@ -1,6 +1,6 @@
 import { Browser } from '../utilities/browser';
 import { Page } from './Pages/base/Page';
-import config from '../../../server-side/config';
+import config from '../../../config';
 import { WebElement, By } from 'selenium-webdriver';
 import { ConsoleColors } from '../../server_side/general.service';
 
