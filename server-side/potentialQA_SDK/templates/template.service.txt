@@ -3,7 +3,7 @@ import {
     User,
     PapiClient,
 } from '@pepperi-addons/papi-sdk';
-import GeneralService from '../../../../potentialQA_SDK/server_side/general.service';
+import GeneralService from '../../../potentialQA_SDK/server_side/general.service';
 
 export class TemplateService {
     papiClient: PapiClient;
@@ -24,5 +24,26 @@ export class TemplateService {
     //this function will call the server by 'isLocal' flag passed to 'run' endpoint
     createUser(body: User): Promise<User> {
         return this.routerClient.post('/CreateUser', body);
+    }
+
+    //this function will ALWAYS call REAL AWS papi -- just another example of cleaning up
+    deleteUser(type, ID) {
+        switch (type) {
+            case 'UUID':
+                return this.papiClient
+                    .delete('/users/uuid/' + ID)
+                    .then((res) => res.text())
+                    .then((res) => (res ? JSON.parse(res) : ''));
+            case 'ExternalID':
+                return this.papiClient
+                    .delete('/users/externalid/' + ID)
+                    .then((res) => res.text())
+                    .then((res) => (res ? JSON.parse(res) : ''));
+            case 'InternalID':
+                return this.papiClient
+                    .delete('/users/' + ID)
+                    .then((res) => res.text())
+                    .then((res) => (res ? JSON.parse(res) : ''));
+        }
     }
 }

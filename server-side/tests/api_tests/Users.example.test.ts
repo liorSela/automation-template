@@ -275,5 +275,13 @@ export async function UsersTests(generalService: GeneralService, addonService: G
                 .and.equals(updatedUser.Phone);
             expect(getUpdatedUser[0], 'Profile').to.have.property('Profile').that.is.an('object');
         });
+
+        it('Example Test: Deleting New Created User', async () => {
+            expect(await service.deleteUser('InternalID', createdUser.InternalID)).to.be.true;
+            expect(await service.deleteUser('InternalID', createdUser.InternalID)).to.be.false;
+            expect(await service.getUsers())
+                .to.be.an('array')
+                .with.lengthOf(currentUserQuantity);
+        });
     });
 }

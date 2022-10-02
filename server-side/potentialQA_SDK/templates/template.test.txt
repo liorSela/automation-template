@@ -10,6 +10,7 @@ export async function TemplateTests(generalService: GeneralService, addonService
     describe('TemplateTests Suites', () => { //the string inside the describe will effect the title of this suite in the report
             //templateToTeplaceWithCtor
             let createdUser; // global vars for whole test (used in more than 1 'it') should be created here
+            let currentUserQuantity;
             it('Basic Test Example #1: Create User Using Service', async () => { //this will set the test name in report
                 // This Is An Example Of How To Write Tests - Using Example Service From Automation Infra - Objects
                 /**
@@ -87,6 +88,18 @@ export async function TemplateTests(generalService: GeneralService, addonService
                     }
                 }
                expect(isUserFound).to.be.true;
+               currentUserQuantity = usersList.length
             });
+            
+            // !!!IMPORTANT COMMENT: all the resource you set or create - MUST be deleted (!); in this case: we created a user so we delete it and validate that it is
+            // in fact was deleted, if you set a code job - you MUST set it off, if you create a scheme you MUST delete it, etc...
+            it('Basic Test Example #3: Cleanup Of All Inserted Data', async () => {
+                expect(await servicez.deleteUser('InternalID', createdUser.InternalID)).to.be.true;
+                expect(await servicez.deleteUser('InternalID', createdUser.InternalID)).to.be.false;
+                expect(await servicez.getUsers())
+                    .to.be.an('array')
+                    .with.lengthOf(currentUserQuantity - 1);
+            });
+
     });
 }

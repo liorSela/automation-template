@@ -23,7 +23,7 @@ export async function template_test_endpoint(client: Client, addonClient: Client
 };
 context["template_test_endpoint"] = template_test_endpoint;
 `;
-const templateTestImport = `import { Template } from '../server-side/tests/api_tests/Template.test';`;
+const templateTestImport = `import { Template } from '../../server-side/tests/api_tests/Template.test';`;
 const templateServiceImport = `import { ServiceName } from "Path";`;
 //const templateCtorLineToReplace = `//ctor replacment line`;
 const abc = `const service = new serviceClass(generalService, addonService.papiClient);`;
