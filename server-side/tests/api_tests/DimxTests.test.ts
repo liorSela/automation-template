@@ -86,15 +86,15 @@ function generateReferenceTableObjects(amountToGenerate: number, mapKeys = false
 }
 
 export async function DimxTests(generalService: GeneralService, addonService: GeneralService, request, tester: TesterFunctions) {
+
     //setting 'mocha verbs' to use
     const describe = tester.describe;
     const expect = tester.expect;
     const it = tester.it;
-
     const dataObj = request.body.Data; // should have the DIMX secret key in dataObj["SK"]
 
     describe('DimxTests Suites', async () => {
-
+        let dimxResources: { [schema_name: string]: ADALTableService };
         // TODO - make this prettier and not awful like this
         const dimxResourceRelationOptionsArray: Relation[] = [
             {
@@ -230,26 +230,30 @@ export async function DimxTests(generalService: GeneralService, addonService: Ge
 
         // create relations
         console.log(`creating relations now`);
-        try {
-            for (let index = 0; index < dimxResourceRelationOptionsArray.length; index++) {
-                const relation: Relation = dimxResourceRelationOptionsArray[index];
-                await resourceManagerService.createRelation(relation);
+        it('1', async () => {
+            try {
+                for (let index = 0; index < dimxResourceRelationOptionsArray.length; index++) {
+                    const relation: Relation = dimxResourceRelationOptionsArray[index];
+                    await resourceManagerService.createRelation(relation);
+                }
+                // await Promise.map(dimxResourceRelationOptionsArray, async (relation: Relation) => {
+                //     return await resourceManagerService.createRelation(relation); //I don't think I need the return values probably
+                //}, { concurrency: MAX_CONCURRENCY });
             }
-            // await Promise.map(dimxResourceRelationOptionsArray, async (relation: Relation) => {
-            //     return await resourceManagerService.createRelation(relation); //I don't think I need the return values probably
-            //}, { concurrency: MAX_CONCURRENCY });
-        }
-        catch (ex) {
-            console.error(`dimxTest create relations: ${ex}`);
-            throw new Error((ex as { message: string }).message);
-        }
-        console.log(`done creating relations`);
+            catch (ex) {
+                console.error(`dimxTest create relations: ${ex}`);
+                throw new Error((ex as { message: string }).message);
+            }
+            console.log(`done creating relations`);
+        });
 
 
-        // create resources
-        console.log(`creating resources now`);
-        const dimxResources: { [schema_name: string]: ADALTableService } = await convertSchemasToAdalTableService(resourceManagerService, dimxResourceSchemas)
-        console.log(`done creating resources`);
+        it('2', async () => {
+            // create resources
+            console.log(`creating resources now`);
+            dimxResources = await convertSchemasToAdalTableService(resourceManagerService, dimxResourceSchemas)
+            console.log(`done creating resources`);
+        });
 
         it('dataImport insert: import data into the Base table, check dataImport output (all should be insert), check items exist', async () => {
             //create the dataImportInput
@@ -494,9 +498,9 @@ export async function DimxTests(generalService: GeneralService, addonService: Ge
                     .that.is.a('Boolean')
                     .and.is.equal(true);
             }
+            await dimxResources["base"].resetSchema()
         });
 
-        await dimxResources["base"].resetSchema()
 
         it('recursiveFileExport: recursively export data from Host table into a file with basic options, check result object, get the file and make sure the data corresponds with expected data', async () => {
 
@@ -745,12 +749,12 @@ export async function DimxTests(generalService: GeneralService, addonService: Ge
                     .to.have.property('IsCurrentlyImporting')
                     .that.is.a('Boolean')
                     .and.is.equal(true);
+                await dimxResources["base"].resetSchema()
+                await dimxResources["host"].resetSchema()
+                await dimxResources["reference"].resetSchema()
             }
         });
 
-        await dimxResources["base"].resetSchema()
-        await dimxResources["host"].resetSchema()
-        await dimxResources["reference"].resetSchema()
 
         it('recursiveFileImport with mapping and fix: recursively export data from Host table into a file with basic options, reset the adal resources and recursive import back. check that all records that reached the tables are correct. this includes replacing mapped keys and fixing strings', async () => {
 
@@ -895,9 +899,9 @@ export async function DimxTests(generalService: GeneralService, addonService: Ge
                     .that.is.a('Boolean')
                     .and.is.equal(true);
             }
+            await resourceManagerService.cleanup()
         });
 
 
-        await resourceManagerService.cleanup()
     });
 }
