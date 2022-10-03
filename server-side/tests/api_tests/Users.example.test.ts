@@ -3,7 +3,8 @@ import { ObjectsService } from './services/Objects.example.service';
 
 
 export async function UsersTests(generalService: GeneralService, addonService: GeneralService, request, tester: TesterFunctions) {
-    const service = new ObjectsService(addonService);
+    const dataObj = request.body.Data; // the 'Data' object passsed inside the http request sent to start the test -- put all the data you need here
+    const service = new ObjectsService(addonService, dataObj);
     const describe = tester.describe;
     const expect = tester.expect;
     const it = tester.it;

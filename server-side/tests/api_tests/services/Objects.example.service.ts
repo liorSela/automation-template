@@ -22,10 +22,12 @@ const apiCallsInterval = 4000;
 export class ObjectsService {
     papiClient: PapiClient;
     generalService: GeneralService;
+    dataObject: any; // the 'Data' object passsed inside the http request sent to start the test -- put all the data you need here
 
-    constructor(public service: GeneralService) {
+    constructor(public service: GeneralService, dataObject:any) {
         this.papiClient = service.papiClient;
         this.generalService = service;
+        this.dataObject = dataObject;
     }
 
     getItems(options?: FindOptions): Promise<Item[]> {

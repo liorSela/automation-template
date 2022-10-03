@@ -4,13 +4,14 @@ import { Client } from '@pepperi-addons/debug-server';
 import { runTest } from './potentialQA_SDK/tests_functions';
 
 /**
- * please notice: this test wont run unless you'll change everything needed
+ * this is the function which 'runs' the test - first function to run once you send the http to the server
  * @param client the client object which received from user 
- * @param request HTTP request received from user
+ * @param request HTTP request received from user - this is the http request you send via postman
  * @param testerFunctions mocha functions passed from infra 
  * @returns tests result
  */
 export async function run(client: Client, request: any, testerFunctions: TesterFunctions) {
-    console.log(`asked to run ${request.body.AddonUUID} tests`);
-    await runTest(request.body.AddonUUID, client, request, testerFunctions);
+    const testedAddonUUID = request.body.AddonUUID;// this is the UUID of tested addon passed inside body
+    console.log(`asked to run ${testedAddonUUID} tests`);
+    await runTest(testedAddonUUID, client, request, testerFunctions);
 }
