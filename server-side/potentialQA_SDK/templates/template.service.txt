@@ -9,11 +9,13 @@ export class TemplateService {
     papiClient: PapiClient;
     routerClient: PapiClient;
     generalService: GeneralService;
+    dataObject: any; // the 'Data' object passsed inside the http request sent to start the test -- put all the data you need here
 
-   constructor(public systemService: GeneralService, public addonService: PapiClient) {
+   constructor(public systemService: GeneralService, public addonService: PapiClient, dataObject:any) {
         this.papiClient = systemService.papiClient; // client which will ALWAYS go OUT
         this.generalService = systemService;
         this.routerClient = addonService; // will run according to passed 'isLocal' flag
+        this.dataObject = dataObject;
     }
 
     //this function will ALWAYS call REAL AWS papi

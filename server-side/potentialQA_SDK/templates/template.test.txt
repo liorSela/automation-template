@@ -2,6 +2,7 @@ import GeneralService, { TesterFunctions } from "../../potentialQA_SDK/server_si
 
 
 export async function TemplateTests(generalService: GeneralService, addonService: GeneralService, request, tester: TesterFunctions) {
+    const dataObj = request.body.Data; // the 'Data' object passsed inside the http request sent to start the test -- put all the data you need here
     //setting 'mocha verbs' to use
     const describe = tester.describe;
     const expect = tester.expect;

@@ -26,7 +26,7 @@ context["template_test_endpoint"] = template_test_endpoint;
 const templateTestImport = `import { Template } from '../../server-side/tests/api_tests/Template.test';`;
 const templateServiceImport = `import { ServiceName } from "Path";`;
 //const templateCtorLineToReplace = `//ctor replacment line`;
-const abc = `const service = new serviceClass(generalService, addonService.papiClient);`;
+const abc = `const service = new serviceClass(generalService, addonService.papiClient, dataObj);`;
 
 const addonUUIDMapper = '../server-side/potentialQA_SDK/mapper.json';
 const serverSideTestsEndpointsLocation = '../server-side/potentialQA_SDK/tests_functions.ts';
