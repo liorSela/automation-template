@@ -1,3 +1,4 @@
+
 import { SchemaExtensions } from '../tests/api_tests/SchemaExtensions.test';
 import GeneralService, { TesterFunctions } from '../potentialQA_SDK/server_side/general.service';
 import { Client, Request } from '@pepperi-addons/debug-server';
@@ -5,6 +6,7 @@ import { Client, Request } from '@pepperi-addons/debug-server';
 import { TestDataTests } from '../potentialQA_SDK/server_side/serverInfra.index';
 import fs from 'fs';
 import { UsersTests } from '../tests/api_tests/Users.example.test';
+import { DimxTests } from '../tests/api_tests/DimxTests.test';
 
 let testName = '';
 let context = {};
@@ -90,4 +92,17 @@ export async function schema_extensions(client: Client, addonClient: Client, req
     await test_data(client, testerFunctions);//this is done to print versions at the end of test - can be deleted
     return (await testerFunctions.run());
 };
+
 context["schema_extensions"] = schema_extensions;
+
+export async function dimx_tests(client: Client, addonClient: Client, request: Request, testerFunctions: TesterFunctions) {
+    const service = new GeneralService(client);
+    const serviceAddon = new GeneralService(addonClient);
+    testName = 'DimxTests'; //printing your test name - done for logging
+    service.PrintMemoryUseToLog('Start', testName);
+    testerFunctions = service.initiateTesterFunctions(client, testName);
+    await DimxTests(service, serviceAddon, request, testerFunctions);//this is the call to YOUR test function
+    await test_data(client, testerFunctions);//this is done to print versions at the end of test - can be deleted
+    return (await testerFunctions.run());
+};
+context["dimx_tests"] = dimx_tests;
