@@ -68,14 +68,22 @@ function generateReferenceTableObjects(amountToGenerate: number, mapKeys = false
                 AddonUUID: DIMX_ADDON_UUID,
                 Resource: CONTAINED_SCHEMA_NAME,
                 Data: {
-                    DynamicReference: `${postMapAndFix && mapKeys ? "Replaced " : ""}${mapKeys ? "ToReplace_" : ""}BaseTableKey${(index * 2) + 0}`,
+                    DynamicReference: {
+                        Key: `${postMapAndFix && mapKeys ? "Replaced " : ""}${mapKeys ? "ToReplace_" : ""}BaseTableKey${(index * 2) + 0}`,
+                        AddonUUID: DIMX_ADDON_UUID,
+                        Resource: BASE_SCHEMA_NAME
+                    },
                     StringProperty: `${postMapAndFix && fixStrings ? "Fixed " : ""}${fixStrings ? "ToFix_" : ""}ContainedTableString${(index * 2) + 0}`,
                 }
             }, {
                 AddonUUID: DIMX_ADDON_UUID,
                 Resource: CONTAINED_SCHEMA_NAME,
                 Data: {
-                    DynamicReference: `${postMapAndFix && mapKeys ? "Replaced " : ""}${mapKeys ? "ToReplace_" : ""}BaseTableKey${(index * 2) + 1}`,
+                    DynamicReference: {
+                        Key: `${postMapAndFix && mapKeys ? "Replaced " : ""}${mapKeys ? "ToReplace_" : ""}BaseTableKey${(index * 2) + 1}`,
+                        AddonUUID: DIMX_ADDON_UUID,
+                        Resource: BASE_SCHEMA_NAME
+                    },
                     StringProperty: `${postMapAndFix && fixStrings ? "Fixed " : ""}${fixStrings ? "ToFix_" : ""}ContainedTableString${(index * 2) + 1}`,
                 }
             }],
@@ -230,7 +238,7 @@ export async function DimxTests(generalService: GeneralService, addonService: Ge
 
         // create relations
         console.log(`creating relations now`);
-        it('1', async () => {
+        it('Create relations', async () => {
             try {
                 for (let index = 0; index < dimxResourceRelationOptionsArray.length; index++) {
                     const relation: Relation = dimxResourceRelationOptionsArray[index];
@@ -248,7 +256,7 @@ export async function DimxTests(generalService: GeneralService, addonService: Ge
         });
 
 
-        it('2', async () => {
+        it('create resources', async () => {
             // create resources
             console.log(`creating resources now`);
             dimxResources = await convertSchemasToAdalTableService(resourceManagerService, dimxResourceSchemas)
@@ -612,6 +620,10 @@ export async function DimxTests(generalService: GeneralService, addonService: Ge
 
         it('recursiveFileImport: recursively export data from Host table into a file with basic options, reset the adal resources and recursive import back. check that all records that reached the tables are correct.', async () => {
 
+            await dimxResources["base"].resetSchema();
+            await dimxResources["host"].resetSchema();
+            await dimxResources["reference"].resetSchema();
+
             // add data to all resources
             const OBJECTS_AMOUNT = 5;
             const baseTableObjectsToImport: BaseTableObject[] = generateBaseTableObjects(OBJECTS_AMOUNT * 2) // there are amount*2 contained objects in the Reference table schema, each contained object holding a reference to Base table
@@ -627,6 +639,10 @@ export async function DimxTests(generalService: GeneralService, addonService: Ge
             const recursiveFileExportOutput: RecursiveExportOutput = await dimxService.SyncDIMXRecursiveFileExport(DIMX_ADDON_UUID, HOST_SCHEMA_NAME, {})
 
             const mapping = await dimxService.syncDIMXCreateMapping(DIMX_ADDON_UUID, HOST_SCHEMA_NAME, recursiveFileExportOutput);
+
+            await dimxResources["base"].resetSchema()
+            await dimxResources["host"].resetSchema()
+            await dimxResources["reference"].resetSchema()
 
             const recursiveFileImportOutput: RecursiveImportOutput = await dimxService.SyncDIMXRecursiveFileImport(DIMX_ADDON_UUID, HOST_SCHEMA_NAME, { ...(recursiveFileExportOutput as RecursiveImportInput), Mapping: mapping.Mapping })
 
@@ -666,10 +682,10 @@ export async function DimxTests(generalService: GeneralService, addonService: Ge
                     .and.is.equal('Insert');
             }
 
-            const hostRecordsFromTable: AddonData[] = await dimxResources["base"].getRecords()
+            const hostRecordsFromTable: AddonData[] = await dimxResources["host"].getRecords()
             expect(hostRecordsFromTable).to.be.an('array').with.lengthOf(hostTableObjectsToImport.length);
 
-            const referenceRecordsFromTable: AddonData[] = await dimxResources["base"].getRecords()
+            const referenceRecordsFromTable: AddonData[] = await dimxResources["reference"].getRecords()
             expect(referenceRecordsFromTable).to.be.an('array').with.lengthOf(referenceTableObjectsToImport.length);
 
             const baseRecordsFromTable: AddonData[] = await dimxResources["base"].getRecords()
@@ -749,14 +765,15 @@ export async function DimxTests(generalService: GeneralService, addonService: Ge
                     .to.have.property('IsCurrentlyImporting')
                     .that.is.a('Boolean')
                     .and.is.equal(true);
-                await dimxResources["base"].resetSchema()
-                await dimxResources["host"].resetSchema()
-                await dimxResources["reference"].resetSchema()
             }
         });
 
 
         it('recursiveFileImport with mapping and fix: recursively export data from Host table into a file with basic options, reset the adal resources and recursive import back. check that all records that reached the tables are correct. this includes replacing mapped keys and fixing strings', async () => {
+
+            await dimxResources["base"].resetSchema()
+            await dimxResources["host"].resetSchema()
+            await dimxResources["reference"].resetSchema()
 
             // add data to all resources
             const OBJECTS_AMOUNT = 5;
@@ -776,6 +793,10 @@ export async function DimxTests(generalService: GeneralService, addonService: Ge
             const recursiveFileExportOutput: RecursiveExportOutput = await dimxService.SyncDIMXRecursiveFileExport(DIMX_ADDON_UUID, HOST_SCHEMA_NAME, {})
 
             const mapping = await dimxService.syncDIMXCreateMapping(DIMX_ADDON_UUID, HOST_SCHEMA_NAME, recursiveFileExportOutput);
+
+            await dimxResources["base"].resetSchema()
+            await dimxResources["host"].resetSchema()
+            await dimxResources["reference"].resetSchema()
 
             const recursiveFileImportOutput: RecursiveImportOutput = await dimxService.SyncDIMXRecursiveFileImport(DIMX_ADDON_UUID, HOST_SCHEMA_NAME, { ...(recursiveFileExportOutput as RecursiveImportInput), Mapping: mapping.Mapping })
 
@@ -815,10 +836,10 @@ export async function DimxTests(generalService: GeneralService, addonService: Ge
                     .and.is.equal('Insert');
             }
 
-            const hostRecordsFromTable: AddonData[] = await dimxResources["base"].getRecords()
+            const hostRecordsFromTable: AddonData[] = await dimxResources["host"].getRecords()
             expect(hostRecordsFromTable).to.be.an('array').with.lengthOf(hostTableObjectsToImport.length);
 
-            const referenceRecordsFromTable: AddonData[] = await dimxResources["base"].getRecords()
+            const referenceRecordsFromTable: AddonData[] = await dimxResources["reference"].getRecords()
             expect(referenceRecordsFromTable).to.be.an('array').with.lengthOf(referenceTableObjectsToImport.length);
 
             const baseRecordsFromTable: AddonData[] = await dimxResources["base"].getRecords()
@@ -899,9 +920,17 @@ export async function DimxTests(generalService: GeneralService, addonService: Ge
                     .that.is.a('Boolean')
                     .and.is.equal(true);
             }
-            await resourceManagerService.cleanup()
         });
 
+        it('resources cleanup', async () => {
+            try {
+                await resourceManagerService.cleanup();
+            }
+            catch (ex) {
+                console.error(`dimxTests resources cleanup: ${ex}`);
+                throw new Error((ex as { message: string }).message);
+            }
+        });
 
     });
 }

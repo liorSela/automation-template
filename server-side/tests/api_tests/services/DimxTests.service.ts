@@ -11,7 +11,9 @@ import {
     RecursiveImportInput,
 } from '@pepperi-addons/papi-sdk';
 import GeneralService from '../../../potentialQA_SDK/server_side/general.service';
-import { FileExportOutput, FileImportOutput, RecursiveImportOutput, RecursiveExportOutput, CreateMappingInput, CreateMappingOutput } from './DIMXTests_types_and_schemes';
+import { FileExportOutput, FileImportOutput, RecursiveImportOutput, RecursiveExportOutput, CreateMappingInput, CreateMappingOutput, DIMX_ADDON_UUID } from './DIMXTests_types_and_schemes';
+import fetch from 'node-fetch';
+
 
 export class DimxTestsService {
     papiClient: PapiClient;
@@ -25,7 +27,7 @@ export class DimxTestsService {
         this.routerClient = addonService; // will run according to passed 'isLocal' flag
         this.dataObject = dataObject;
     }
-    BaseURL = "/api";
+    BaseURL = `/addons/api/${DIMX_ADDON_UUID}/api`;
 
     //this function will ALWAYS call REAL AWS papi
     getUsers(options?: FindOptions): Promise<User[]> {

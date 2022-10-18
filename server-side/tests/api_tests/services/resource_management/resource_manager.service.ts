@@ -21,6 +21,7 @@ export class ResourceManagerService {
 
         try {
             await removableResource.initResource();
+            this.activeResources.push(removableResource);
         }
         catch (ex) {
             console.error(`createAdalTable: ${ex}`);
@@ -37,6 +38,7 @@ export class ResourceManagerService {
 
         try {
             await removableResource.initResource();
+            this.activeResources.push(removableResource);
         }
         catch (ex) {
             console.error(`createRelation: ${ex}`);
@@ -50,15 +52,20 @@ export class ResourceManagerService {
     async cleanup(): Promise<any[]> {
 
         const PARALLEL_AMOUNT = 5;
+        try {
+            const results: any[] = await Promise.map(this.activeResources,
+                async (removableResource: RemovableResource) => {
+                    return (await removableResource.removeResource())
+                },
+                { concurrency: PARALLEL_AMOUNT });
 
-        const results: any[] = await Promise.map(this.activeResources,
-            async (removableResource: RemovableResource) => {
-                return (await removableResource.removeResource())
-            },
-            { concurrency: PARALLEL_AMOUNT });
+            this.activeResources = [];
 
-        this.activeResources = [];
-
-        return results;
+            return results;
+        }
+        catch (ex) {
+            console.error(`cleanup: ${ex}`);
+            throw new Error((ex as { message: string }).message);
+        }
     }
 }
