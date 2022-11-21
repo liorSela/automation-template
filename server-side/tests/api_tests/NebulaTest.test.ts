@@ -23,19 +23,19 @@ export async function NebulaTest(generalService: GeneralService, addonService: G
     const automationAddonUUID = "02754342-e0b5-4300-b728-a94ea5e0e8f4";
 
     describe('NebulaTest Suites', () => { //the string inside the describe will effect the title of this suite in the report
-        //const nebulatestService = new NebulaTestService(generalService, addonService.papiClient, dataObj);
-        const nebulatestService = new NebulaLocalFunctions(generalService, addonService.papiClient, dataObj);
+        const nebulatestService = new NebulaTestService(generalService, addonService.papiClient, dataObj);
+        //const nebulatestService = new NebulaLocalFunctions(generalService, addonService.papiClient, dataObj);
         const performanceManager: PerformanceManager = new PerformanceManager();
         const resourceManager: ResourceManagerService = new ResourceManagerService(addonService.papiClient, automationAddonUUID);
 
-        it(`first clean of PNS`, async () => {
-            await nebulatestService.initPNS();
-            const originalBaseURL = nebulatestService.papiClient['options'].baseURL;
-            nebulatestService.papiClient['options'].baseURL = "";
-            await nebulatestService.papiClient.post('http://localhost:4500/pns_endpoints/foo', { hello: "world" });
-            await nebulatestService.papiClient.post('http://localhost:4500/pns_endpoints/foo', { hello2: "world2" });
-            nebulatestService.papiClient['options'].baseURL = originalBaseURL;
-        });
+        // it(`first clean of PNS`, async () => {
+        //     await nebulatestService.initPNS();
+        //     //const originalBaseURL = nebulatestService.papiClient['options'].baseURL;
+        //     //nebulatestService.papiClient['options'].baseURL = "";
+        //     //await nebulatestService.papiClient.post('http://localhost:4500/pns_endpoints/foo', { hello: "world" });
+        //     //await nebulatestService.papiClient.post('http://localhost:4500/pns_endpoints/foo', { hello: "world" });
+        //     //nebulatestService.papiClient['options'].baseURL = originalBaseURL;
+        // });
 
         it(`Create ADAL schema with sync=true, add items, wait for 16 seconds and check if nebula has the records`, async () => {
             performanceManager.startMeasure(`Test 1`, `Create ADAL schema with sync=true, add items, wait for 16 seconds and check if nebula has the records`);

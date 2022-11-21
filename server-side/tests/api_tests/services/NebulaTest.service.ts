@@ -6,6 +6,28 @@ import GeneralService from '../../../potentialQA_SDK/server_side/general.service
 import jwtDecode from "jwt-decode";
 
 export class NebulaTestService {
+    pnsInsertRecords(testingAddonUUID: string, tableName: string, test_7_items: import("./NebulaPNSEmulator.service").BasicRecord[]) {
+        return
+    }
+    //     try {
+    //         return await this.routerClient.post(this.nebulaCypherRelativeURL, {
+    //             "Query": cypher
+    //         });
+    //     }
+    //     catch (ex) {
+    //         console.error(`Error in sendCypherToNebula: ${ex}`);
+    //         throw new Error((ex as { message: string }).message);
+    //     }
+    // }
+    initPNS() {
+        return
+    }
+    pnsUpdateSchemaSyncStatus(testingAddonUUID: string, tableName: string, arg2: boolean) {
+        return
+    }
+    pnsInsertSchema(testingAddonUUID: string, tableName: string) {
+        return;
+    }
     papiClient: PapiClient;
     routerClient: PapiClient;
     generalService: GeneralService;
@@ -101,7 +123,7 @@ export class NebulaTestService {
 
     // wait for x seconds depending on the current PNS delay time
     async waitForPNS() {
-        const pnsDelaySeconds = 15;
+        const pnsDelaySeconds = 10;
         console.log(`Waiting for ${pnsDelaySeconds} seconds for PNS to catch up...`);
         await this.generalService.sleep(pnsDelaySeconds * 1000);
         console.log(`Done waiting for PNS`);

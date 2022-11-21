@@ -115,7 +115,7 @@ export class NebulaLocalFunctions extends NebulaTestService {
         Hidden: boolean;
     }[]> {
         try {
-            this.routerClient['options']['baseURL'] = this.nebulaLocalRelativeURL;
+            this.routerClient['options']['baseURL'] = "";
             const results = (await this.routerClient.post(this.nebulaGetResourcesRequiringSyncRelativeURL, {
                 "ModificationDateTime": ModificationDateTime,
                 "IncludeDeleted": IncludeDeleted
@@ -136,7 +136,7 @@ export class NebulaLocalFunctions extends NebulaTestService {
         Hidden: boolean;
     }[]> {
         try {
-            this.routerClient['options']['baseURL'] = this.nebulaLocalRelativeURL;
+            this.routerClient['options']['baseURL'] = "";
             const results = (await this.routerClient.post(`${this.nebulaGetRecordsRequiresSyncRelativeURL}?addon_uuid=${addonUUID}&resource=${resource}`, {
                 "ModificationDateTime": ModificationDateTime,
                 "IncludeDeleted": IncludeDeleted
@@ -157,7 +157,7 @@ export class NebulaLocalFunctions extends NebulaTestService {
                 AddonUUID: addonUUID,
                 Name: resource,
             }
-            this.routerClient['options']['baseURL'] = this.nebulaLocalRelativeURL;
+            this.routerClient['options']['baseURL'] = "";
             const rawResults = await this.routerClient.post(this.nebulaGetRecordsRelativeURL, body);
             this.routerClient['options']['baseURL'] = this.originalBaseURL;
             const resultsArray: any[] = rawResults.results;
