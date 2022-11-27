@@ -9,6 +9,8 @@ import fs from 'fs';
 import { UsersTests } from '../tests/api_tests/Users.example.test';
 import { DimxTests } from '../tests/api_tests/DimxTests.test';
 
+import { AddonUUID as AddonUUIDFromAddonConfig } from '../../addon.config.json'; // TODO: remove, part of a temporarily fix
+
 let testName = '';
 let context = {};
 
@@ -109,6 +111,12 @@ export async function dimx_tests(client: Client, addonClient: Client, request: R
 context["dimx_tests"] = dimx_tests;
 
 export async function data_index_where_clause(client: Client, addonClient: Client, request: Request, testerFunctions: TesterFunctions) {
+    // TODO: remove next 3 lines, part of a temporarily fix
+    client.AddonUUID = AddonUUIDFromAddonConfig;
+    let tempService = new GeneralService(client);
+    client.AddonSecretKey = tempService.getSecret()[1];
+
+
     const service = new GeneralService(client);
     const serviceAddon = new GeneralService(addonClient);
     testName = 'DataIndexWhereClause'; //printing your test name - done for logging
