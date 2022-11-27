@@ -10,4 +10,14 @@ export async function DataIndexWhereClause(generalService: GeneralService, addon
     const describe = tester.describe;
     const expect = tester.expect;
     const it = tester.it;
+
+    describe('Regular Index Tests:', async () => {
+        it("Index Creation", async () => {
+            await service.createIndexSchema();
+        })
+
+        it("Index Deletion", async () => {
+            await service.purgeIndexSchema();
+        })
+    });
 }
