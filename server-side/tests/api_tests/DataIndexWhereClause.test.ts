@@ -11,13 +11,25 @@ export async function DataIndexWhereClause(generalService: GeneralService, addon
     const expect = tester.expect;
     const it = tester.it;
 
-    describe('Regular Index Tests:', async () => {
-        it("Index Creation", async () => {
-            await service.createIndexSchema();
+    describe('Index Tests:', async () => {
+        let connector = service.indexType("regular");
+        it(`Creation`, async () => {
+            console.log(await connector.upsertSchema({}));
         })
 
-        it("Index Deletion", async () => {
-            await service.purgeIndexSchema();
+        it(`Deletion`, async () => {
+            await connector.purgeSchema();
+        })
+    });
+
+    describe('Shared-Index Tests:', async () => {
+        let connector = service.indexType("shared");
+        it(`Creation`, async () => {
+            console.log(await connector.upsertSchema({}));
+        })
+
+        it(`Deletion`, async () => {
+            await connector.purgeSchema();
         })
     });
 }
