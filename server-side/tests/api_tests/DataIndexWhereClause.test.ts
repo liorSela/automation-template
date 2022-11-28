@@ -1,3 +1,5 @@
+import { expect } from 'chai';
+import { Connector, validateOrderOfResponseBySpecificField } from './services/DataIndexWhereClause.service';
 import { PapiClient } from '@pepperi-addons/papi-sdk';
 //00000000-0000-0000-0000-00000e1a571c
 import { DataIndexWhereClauseService } from "./services/dataindexwhereclause.service";
@@ -13,23 +15,149 @@ export async function DataIndexWhereClause(generalService: GeneralService, addon
 
     describe('Index Tests:', async () => {
         let connector = service.indexType("regular");
-        it(`Creation`, async () => {
-            console.log(await connector.upsertSchema({}));
-        })
-
-        it(`Deletion`, async () => {
-            await connector.purgeSchema();
-        })
+        testerFunc(it, expect, connector);
     });
 
     describe('Shared-Index Tests:', async () => {
         let connector = service.indexType("shared");
-        it(`Creation`, async () => {
-            console.log(await connector.upsertSchema({}));
-        })
+        testerFunc(it, expect, connector);
+    });
+}
 
-        it(`Deletion`, async () => {
-            await connector.purgeSchema();
-        })
+function testerFunc(it: any, expect, connector: Connector) {
+    it(`Index Creation`, async () => {
+        await connector.upsertSchema({
+            "Fields": {
+                "string_field": {
+                    "Type": "String",
+                    "Indexed": true
+                },
+                "bool_field": {
+                    "Type": "Bool",
+                    "Indexed": true
+                },
+                "int_field": {
+                    "Type": "Integer",
+                    "Indexed": true
+                },
+                "double_field": {
+                    "Type": "Double",
+                    "Indexed": true
+                },
+                "date_field": {
+                    "Type": "DateTime",
+                    "Indexed": true
+                },
+                "unindexed_field": {
+                    "Type": "String",
+                    "Indexed": false
+                }
+            }
+        });
+    });
+
+    it(`Create Documents`, async () => {
+        await connector.batchUpsertDocuments([
+            {
+                Key: "1",
+                string_field: "f",
+                bool_field: true,
+                int_field: 6,
+                double_field: 9.5,
+                date_field: "2022-11-24T12:43:32.166Z",
+                unindexed_field: "shouldn't be indexed"
+            },
+            {
+                Key: "2",
+                string_field: "e",
+                bool_field: false,
+                int_field: 4,
+                double_field: 6.2,
+                date_field: "2022-11-24T12:45:32.166Z",
+                unindexed_field: "shouldn't be indexed"
+            },
+            {
+                Key: "3",
+                string_field: "d",
+                bool_field: true,
+                int_field: 2,
+                double_field: 1.5,
+                date_field: "2022-11-24T12:47:32.166Z",
+                unindexed_field: "shouldn't be indexed"
+            },
+            {
+                Key: "4",
+                string_field: "c",
+                bool_field: false,
+                int_field: 1,
+                double_field: 2.3,
+                date_field: "2022-11-24T12:46:32.166Z",
+                unindexed_field: "shouldn't be indexed"
+            },
+            {
+                Key: "5",
+                string_field: "b",
+                bool_field: true,
+                int_field: 3,
+                double_field: 8.4,
+                date_field: "2022-11-24T12:44:32.166Z",
+                unindexed_field: "shouldn't be indexed"
+            },
+            {
+                Key: "6",
+                string_field: "a",
+                bool_field: false,
+                int_field: 5,
+                double_field: 10.0,
+                date_field: "2022-11-24T12:42:32.166Z",
+                unindexed_field: "shouldn't be indexed"
+            }
+        ]);
+    })
+
+    it("Get all documents ordered by Key", async () => {
+        let diResponse = await connector.getDocuments({
+            order_by: "Key"
+        });
+        validateOrderOfResponseBySpecificField(diResponse, "Key");
+    })
+
+    it("Get all documents ordered by string_field", async () => {
+        let diResponse = await connector.getDocuments({
+            order_by: "string_field"
+        });
+        validateOrderOfResponseBySpecificField(diResponse, "string_field");
+    })
+
+    it("Get all documents ordered by bool_field", async () => {
+        let diResponse = await connector.getDocuments({
+            order_by: "bool_field"
+        });
+        validateOrderOfResponseBySpecificField(diResponse, "bool_field", true);
+    })
+
+    it("Get all documents ordered by int_field", async () => {
+        let diResponse = await connector.getDocuments({
+            order_by: "int_field"
+        });
+        validateOrderOfResponseBySpecificField(diResponse, "int_field");
+    })
+
+    it("Get all documents ordered by double_field", async () => {
+        let diResponse = await connector.getDocuments({
+            order_by: "double_field"
+        });
+        validateOrderOfResponseBySpecificField(diResponse, "double_field");
+    })
+
+    it("Get all documents ordered by date_field", async () => {
+        let diResponse = await connector.getDocuments({
+            order_by: "date_field"
+        });
+        validateOrderOfResponseBySpecificField(diResponse, "date_field");
+    })
+
+    it(`Index Purge`, async () => {
+        await connector.purgeSchema();
     });
 }
