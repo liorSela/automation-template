@@ -60,7 +60,7 @@ function testerFunc(it: any, expect, connector: Connector) {
         await connector.batchUpsertDocuments([
             {
                 Key: "1",
-                string_field: "f",
+                string_field: "Susann Renato",
                 bool_field: true,
                 int_field: 6,
                 double_field: 9.5,
@@ -69,7 +69,7 @@ function testerFunc(it: any, expect, connector: Connector) {
             },
             {
                 Key: "2",
-                string_field: "e",
+                string_field: "Jessika Renato",
                 bool_field: false,
                 int_field: 4,
                 double_field: 6.2,
@@ -78,7 +78,7 @@ function testerFunc(it: any, expect, connector: Connector) {
             },
             {
                 Key: "3",
-                string_field: "d",
+                string_field: "Jessika Silvano",
                 bool_field: true,
                 int_field: 2,
                 double_field: 1.5,
@@ -87,7 +87,7 @@ function testerFunc(it: any, expect, connector: Connector) {
             },
             {
                 Key: "4",
-                string_field: "c",
+                string_field: "Shani Silvano",
                 bool_field: false,
                 int_field: 1,
                 double_field: 2.3,
@@ -96,7 +96,7 @@ function testerFunc(it: any, expect, connector: Connector) {
             },
             {
                 Key: "5",
-                string_field: "b",
+                string_field: "Susann Kimbell",
                 bool_field: true,
                 int_field: 3,
                 double_field: 8.4,
@@ -105,7 +105,7 @@ function testerFunc(it: any, expect, connector: Connector) {
             },
             {
                 Key: "6",
-                string_field: "a",
+                string_field: "Shani Kimbell",
                 bool_field: false,
                 int_field: 5,
                 double_field: 10.0,
@@ -119,6 +119,7 @@ function testerFunc(it: any, expect, connector: Connector) {
         let diResponse = await connector.getDocuments({
             order_by: "Key"
         });
+        expect(diResponse, "Response array").to.be.an('array').with.lengthOf(6);
         validateOrderOfResponseBySpecificField(diResponse, "Key");
     })
 
@@ -126,6 +127,7 @@ function testerFunc(it: any, expect, connector: Connector) {
         let diResponse = await connector.getDocuments({
             order_by: "string_field"
         });
+        expect(diResponse, "Response array").to.be.an('array').with.lengthOf(6);
         validateOrderOfResponseBySpecificField(diResponse, "string_field");
     })
 
@@ -133,6 +135,7 @@ function testerFunc(it: any, expect, connector: Connector) {
         let diResponse = await connector.getDocuments({
             order_by: "bool_field"
         });
+        expect(diResponse, "Response array").to.be.an('array').with.lengthOf(6);
         validateOrderOfResponseBySpecificField(diResponse, "bool_field", true);
     })
 
@@ -140,6 +143,7 @@ function testerFunc(it: any, expect, connector: Connector) {
         let diResponse = await connector.getDocuments({
             order_by: "int_field"
         });
+        expect(diResponse, "Response array").to.be.an('array').with.lengthOf(6);
         validateOrderOfResponseBySpecificField(diResponse, "int_field");
     })
 
@@ -147,6 +151,7 @@ function testerFunc(it: any, expect, connector: Connector) {
         let diResponse = await connector.getDocuments({
             order_by: "double_field"
         });
+        expect(diResponse, "Response array").to.be.an('array').with.lengthOf(6);
         validateOrderOfResponseBySpecificField(diResponse, "double_field");
     })
 
@@ -154,7 +159,43 @@ function testerFunc(it: any, expect, connector: Connector) {
         let diResponse = await connector.getDocuments({
             order_by: "date_field"
         });
+        expect(diResponse, "Response array").to.be.an('array').with.lengthOf(6);
         validateOrderOfResponseBySpecificField(diResponse, "date_field");
+    })
+
+    it("Get all documents that string_field starts with \"Susann\"", async () => {
+        let diResponse = await connector.getDocuments({
+            where: "string_field like 'Susann%'"
+        });
+        expect(diResponse, "Response array").to.be.an('array').with.lengthOf(2);
+    })
+
+    it("Get all documents that string_field end with \"Kimbell\"", async () => {
+        let diResponse = await connector.getDocuments({
+            where: "string_field like '%Kimbell'"
+        });
+        expect(diResponse, "Response array").to.be.an('array').with.lengthOf(2);
+    })
+
+    it("Get all documents that int_field is greater then 4", async () => {
+        let diResponse = await connector.getDocuments({
+            where: "int_field > 4"
+        });
+        expect(diResponse, "Response array").to.be.an('array').with.lengthOf(2);
+    })
+
+    it("Get all documents that int_field is lesser then 4", async () => {
+        let diResponse = await connector.getDocuments({
+            where: "int_field < 4"
+        });
+        expect(diResponse, "Response array").to.be.an('array').with.lengthOf(3);
+    })
+
+    it("Get all documents that int_field is in range", async () => {
+        let diResponse = await connector.getDocuments({
+            where: "int_field >= 2 and int_field <= 5"
+        });
+        expect(diResponse, "Response array").to.be.an('array').with.lengthOf(4);
     })
 
     it(`Index Purge`, async () => {
