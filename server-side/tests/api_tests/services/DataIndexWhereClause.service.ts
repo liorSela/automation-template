@@ -38,6 +38,7 @@ export class DataIndexWhereClauseService {
             Name: "integration-test-regular-index-" + uuid(),
             Type: "index"
         }
+        console.log("Regular index schema will be called: " + this.indexSchema.Name);
         this.sharedIndexSchema = {
             Name: "integration-test-schema-of-shared-index-" + uuid(),
             Type: "shared_index",
@@ -45,6 +46,7 @@ export class DataIndexWhereClauseService {
                 IndexName: "integration-test-shared-index-" + uuid()
             }
         }
+        console.log("Shared index schema will be called: " + this.indexSchema.Name);
     }
 
     indexType = (type: "regular" | "shared"): Connector => {
