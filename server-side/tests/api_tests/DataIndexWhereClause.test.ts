@@ -198,13 +198,6 @@ function testerFunc(it: any, expect, connector: Connector) {
         expect(diResponse, "Response array").to.be.an('array').with.lengthOf(4);
     })
 
-    it("Get all documents that int_field is in range (using between)", async () => {
-        let diResponse = await connector.getDocuments({
-            where: "int_field between 2 and 5"
-        });
-        expect(diResponse, "Response array").to.be.an('array').with.lengthOf(4);
-    })
-
     it("Get all documents that int_field out of range (using or)", async () => {
         let diResponse = await connector.getDocuments({
             where: "int_field < 2 or int_field > 5"
@@ -212,9 +205,23 @@ function testerFunc(it: any, expect, connector: Connector) {
         expect(diResponse, "Response array").to.be.an('array').with.lengthOf(2);
     })
 
-    it("Get all documents that int_field out of range (using between + not)", async () => {
+    it("Get all documents that int_field not equal 4 (using not and equal)", async () => {
         let diResponse = await connector.getDocuments({
-            where: "not int_field between 2 and 5"
+            where: "not int_field = 4"
+        });
+        expect(diResponse, "Response array").to.be.an('array').with.lengthOf(5);
+    })
+
+    it("Get all documents that int_field not equal 4 (using !=)", async () => {
+        let diResponse = await connector.getDocuments({
+            where: "int_field != 4"
+        });
+        expect(diResponse, "Response array").to.be.an('array').with.lengthOf(5);
+    })
+
+    it("Get all documents that int_field out of range (using nand)", async () => {
+        let diResponse = await connector.getDocuments({
+            where: "not (int_field >= 2 and int_field <= 5)"
         });
         expect(diResponse, "Response array").to.be.an('array').with.lengthOf(2);
     })
