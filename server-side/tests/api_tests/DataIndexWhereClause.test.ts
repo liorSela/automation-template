@@ -198,6 +198,27 @@ function testerFunc(it: any, expect, connector: Connector) {
         expect(diResponse, "Response array").to.be.an('array').with.lengthOf(4);
     })
 
+    it("Get all documents that int_field is in range (using between)", async () => {
+        let diResponse = await connector.getDocuments({
+            where: "int_field between 2 and 5"
+        });
+        expect(diResponse, "Response array").to.be.an('array').with.lengthOf(4);
+    })
+
+    it("Get all documents that int_field out of range (using or)", async () => {
+        let diResponse = await connector.getDocuments({
+            where: "int_field < 2 or int_field > 5"
+        });
+        expect(diResponse, "Response array").to.be.an('array').with.lengthOf(2);
+    })
+
+    it("Get all documents that int_field out of range (using between + not)", async () => {
+        let diResponse = await connector.getDocuments({
+            where: "not int_field between 2 and 5"
+        });
+        expect(diResponse, "Response array").to.be.an('array').with.lengthOf(2);
+    })
+
     it(`Index Purge`, async () => {
         await connector.purgeSchema();
     });
