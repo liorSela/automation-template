@@ -27,6 +27,7 @@ export class DataIndexWhereClauseService {
     addonUUID: string;
     indexSchema: AddonDataScheme;
     sharedIndexSchema: AddonDataScheme;
+    sharedIndexName: string;
 
     constructor(public systemService: GeneralService, public addonService: PapiClient, dataObject: any) {
         this.papiClient = systemService.papiClient; // client which will ALWAYS go OUT
@@ -34,6 +35,7 @@ export class DataIndexWhereClauseService {
         this.routerClient = addonService; // will run according to passed 'isLocal' flag
         this.dataObject = dataObject;
         this.addonUUID = "02754342-e0b5-4300-b728-a94ea5e0e8f4";
+        this.sharedIndexName = "integration-test-shared-index-" + uuid();
         this.indexSchema = {
             Name: "integration-test-regular-index-" + uuid(),
             Type: "index"
@@ -43,33 +45,41 @@ export class DataIndexWhereClauseService {
             Name: "integration-test-schema-of-shared-index-" + uuid(),
             Type: "shared_index",
             DataSourceData: {
-                IndexName: "integration-test-shared-index-" + uuid()
+                IndexName: this.sharedIndexName
             }
         }
-        console.log("Shared index schema will be called: " + this.indexSchema.Name);
+        console.log("Shared index schema will be called: " + this.sharedIndexSchema.Name);
     }
 
     indexType = (type: "regular" | "shared"): Connector => {
-        let baseSchema: AddonDataScheme = type === "regular" ? this.indexSchema : this.sharedIndexSchema
+        let baseSchema: AddonDataScheme
+        let api: any;
+        if (type === "regular") {
+            baseSchema = this.indexSchema;
+            api = this.papiClient.addons.index;
+        } else {
+            baseSchema = this.sharedIndexSchema;
+            api = this.papiClient.addons.shared_index.index.index_name(this.sharedIndexName);
+        }
         return {
             upsertSchema: (scheme: PartialScheme) => {
                 return this.papiClient.addons.data.schemes
                     .post({ ...scheme, ...baseSchema });
             },
             upsertDocument: (document: any) => {
-                return this.papiClient.addons.index
+                return api
                     .uuid(this.addonUUID)
                     .resource(baseSchema.Name)
                     .create(document);
             },
             batchUpsertDocuments: (documents: ElasticSearchDocument[]) => {
-                return this.papiClient.addons.index
+                return api
                     .batch({ Objects: documents })
                     .uuid(this.addonUUID)
                     .resource(baseSchema.Name);
             },
             getDocuments: (params: FindOptions): Promise<ElasticSearchDocument[]> => {
-                return this.papiClient.addons.index
+                return api
                     .uuid(this.addonUUID)
                     .resource(baseSchema.Name)
                     .find(params);
