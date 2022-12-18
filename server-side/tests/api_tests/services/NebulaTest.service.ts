@@ -106,18 +106,17 @@ export class NebulaTestService {
     }
 
     async getRecordsFromNebula(addonUUID: string, resource: string) {
-        try {
-            const body = {
-                AddonUUID: addonUUID,
-                Name: resource,
-            }
-            const rawResults = await this.routerClient.post(this.nebulaGetRecordsRelativeURL, body);
-            const resultsArray: any[] = rawResults.results;
-            return resultsArray.map((record: any) => record['n']).map((record: any) => record['~properties']);
+        const body = {
+            AddonUUID: addonUUID,
+            Name: resource,
         }
-        catch (ex) {
-            console.error(`Error in getRecordsFromNebula: ${ex}`);
-            throw new Error((ex as { message: string }).message);
+
+        try {
+            return await this.routerClient.post(this.nebulaGetRecordsRelativeURL, body);
+        }
+        catch (error) {
+            console.error(`Error in getRecordsFromNebula: ${(error as Error).message}`);
+            throw error;
         }
     }
 
