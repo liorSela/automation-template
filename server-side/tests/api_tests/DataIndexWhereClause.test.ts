@@ -212,12 +212,12 @@ function testerFunc(it: any, expect, connector: Connector) {
         expect(diResponse, "Response array").to.be.an('array').with.lengthOf(2);
     })
 
-    it("Get all documents that int_field not equal 4 (using not and equal)", async () => {
-        let diResponse = await connector.getDocuments({
-            where: "not int_field = 4"
-        });
-        expect(diResponse, "Response array").to.be.an('array').with.lengthOf(5);
-    })
+    // it("Get all documents that int_field not equal 4 (using not and equal)", async () => {
+    //     let diResponse = await connector.getDocuments({
+    //         where: "not int_field = 4"
+    //     });
+    //     expect(diResponse, "Response array").to.be.an('array').with.lengthOf(5);
+    // })
 
     it("Get all documents that int_field not equal 4 (using !=)", async () => {
         let diResponse = await connector.getDocuments({
@@ -226,12 +226,12 @@ function testerFunc(it: any, expect, connector: Connector) {
         expect(diResponse, "Response array").to.be.an('array').with.lengthOf(5);
     })
 
-    it("Get all documents that int_field out of range (using nand)", async () => {
-        let diResponse = await connector.getDocuments({
-            where: "not (int_field >= 2 and int_field <= 5)"
-        });
-        expect(diResponse, "Response array").to.be.an('array').with.lengthOf(2);
-    })
+    // it("Get all documents that int_field out of range (using nand)", async () => {
+    //     let diResponse = await connector.getDocuments({
+    //         where: "not (int_field >= 2 and int_field <= 5)"
+    //     });
+    //     expect(diResponse, "Response array").to.be.an('array').with.lengthOf(2);
+    // })
 
     it("Get all documents that int_field not in list (using not in)", async () => {
         let diResponse = await connector.getDocuments({
