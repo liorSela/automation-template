@@ -3,12 +3,13 @@ import { NebulaTestService } from "./services/nebulatest.service";
 import GeneralService, { TesterFunctions } from "../../potentialQA_SDK/server_side/general.service";
 import { PerformanceManager } from "./services/performance_management/performance_manager";
 import { ResourceManagerService } from "./services/resource_management/resource_manager.service";
-import { AddonData, AddonDataScheme } from "@pepperi-addons/papi-sdk";
+import { AddonData, AddonDataScheme, User } from "@pepperi-addons/papi-sdk";
 import { ADALTableService } from "./services/resource_management/adal_table.service";
 import { v4 as uuidv4 } from 'uuid';
 import { NebulaLocalFunctions } from "./services/NebulaLocalFunctions.service";
 import { AddonUUID as testingAddonUUID } from "../../../addon.config.json";
 import { BasicRecord } from "./services/NebulaPNSEmulator.service";
+import jwt from 'jwt-decode';
 
 function getShortUUID(): string {
     return uuidv4().split('-')[0];
@@ -22,9 +23,14 @@ export async function NebulaTest(generalService: GeneralService, addonService: G
     const it = tester.it;
     const automationAddonUUID = "02754342-e0b5-4300-b728-a94ea5e0e8f4";
 
-    describe('NebulaTest Suites', () => { //the string inside the describe will effect the title of this suite in the report
+    async function cleanUp(resourceManager: ResourceManagerService, performanceManager: PerformanceManager) {
+        //TODO: add PNS cleanup here
+        await resourceManager.cleanup();
+        console.log(JSON.stringify(performanceManager.getStatistics()));
+    }
+
+    describe('NebulaTest Suites', () => {
         const nebulatestService = new NebulaTestService(generalService, addonService.papiClient, dataObj);
-        //const nebulatestService = new NebulaLocalFunctions(generalService, addonService.papiClient, dataObj);
         const performanceManager: PerformanceManager = new PerformanceManager();
         const resourceManager: ResourceManagerService = new ResourceManagerService(addonService.papiClient, automationAddonUUID);
 
@@ -513,11 +519,113 @@ export async function NebulaTest(generalService: GeneralService, addonService: G
         });
 
         it(`Cleanup Of All Inserted Data and print performance statistics`, async () => {
-            //TODO add PNS cleanup here
-            resourceManager.cleanup();
-            console.log(JSON.stringify(performanceManager.getStatistics()));
+            await cleanUp(resourceManager, performanceManager);
+        });
+    });
+
+    describe('GetDocumentKeysRequiringSyncCommand Suite', async () => {
+        const nebulatestService = new NebulaTestService(generalService, addonService.papiClient, dataObj);
+        const performanceManager: PerformanceManager = new PerformanceManager();
+        const resourceManager: ResourceManagerService = new ResourceManagerService(addonService.papiClient, automationAddonUUID);
+
+        const CORE_RESOURCES_UUID = 'fc5a5974-3b30-4430-8feb-7d5b9699bc9f';
+        const USERS_TABLE = 'users';
+
+        async function getUsersToPointTo(): Promise<{ currentUser: User, otherUser: User }> {
+            const users = await getUsers();
+            
+            const currentUser = users.find(user => { return user.UUID === getCurrentUser() });
+            const otherUser = users.find(user => { return user.UUID !== getCurrentUser() });
+
+            if (currentUser === undefined || otherUser === undefined) {
+                throw new Error('Distributor does not have enough users to preform test, create a user and try again.');
+            }
+
+            return {
+                currentUser: currentUser,
+                otherUser: otherUser
+            };
+        }
+
+        async function getUsers() {
+            const users = await addonService.papiClient.users.find();
+
+            if (users.length < 2) {
+                throw new Error('Distributor does not have enough users to preform test, create a user and try again.');
+            }
+
+            return users;
+        }
+
+        function getCurrentUser(): string {
+            const decodedToken: any = jwt(addonService.papiClient['options'].token);
+            const currentUser = decodedToken["pepperi.useruuid"];
+            return currentUser;
+        }
+
+        it('Create a table with 6 documents pointing to users, 3 to current user and 3 to another one, call GetDocumentKeysRequiringSyncCommand and expect to get only those that point to current user', async () => {
+
+            const timeStampBeforeCreation = new Date().toISOString();
+            
+            // Get users.
+            const { currentUser, otherUser } = await getUsersToPointTo();
+
+            // Create a table that points to the users table.
+            const pointingSchema: AddonDataScheme = {
+                Name: "nebulaTestPointToUserTable" + getShortUUID(),
+                Type: "data",
+                Fields:
+                {
+                    field1: { 
+                        Type: "Resource",
+                        ApplySystemFilter: true,
+                        AddonUUID: CORE_RESOURCES_UUID,
+                        Resource: USERS_TABLE
+                    },
+                },
+                SyncData: {
+                    Sync: true
+                }
+            };
+            const pointingSchemaService: ADALTableService = await resourceManager.createAdalTable(pointingSchema);
+            const documentsThatShouldRequireSync = ['4', '5', '6'];
+            const pointingSchemaDocuments: AddonData[] = [{
+                Key: '1',
+                field1: otherUser.UUID
+            }, {
+                Key: '2',
+                field1: otherUser.UUID
+            }, {
+                Key: '3',
+                field1: otherUser.UUID
+            }, {
+                Key: documentsThatShouldRequireSync[0],
+                field1: currentUser.UUID
+            }, {
+                Key: documentsThatShouldRequireSync[1],
+                field1: currentUser.UUID
+            }, {
+                Key: documentsThatShouldRequireSync[2],
+                field1: currentUser.UUID
+            }];
+            await pointingSchemaService.upsertBatch(pointingSchemaDocuments);
+
+            // wait for PNS callback to create nodes and edges in graph.
+            await nebulatestService.waitForPNS();
+
+            // Check only documents that points to current user are retrieved.
+            const recordsRequiringSync = await nebulatestService.getRecordsRequiringSync(automationAddonUUID, pointingSchema.Name, timeStampBeforeCreation);
+            expect(recordsRequiringSync).to.not.be.undefined;
+            expect(recordsRequiringSync.length).to.be.equal(3);
+
+            recordsRequiringSync.forEach(recordRequiringSync => {
+                expect(documentsThatShouldRequireSync.includes(recordRequiringSync.Key)).to.be.true;
+            });
         });
 
+        it(`Cleanup Of All Inserted Data and print performance statistics`, async () => {
+            await cleanUp(resourceManager, performanceManager);
+        });
     });
 }
 

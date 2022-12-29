@@ -122,7 +122,7 @@ export class NebulaTestService {
 
     // wait for x seconds depending on the current PNS delay time
     async waitForPNS() {
-        const pnsDelaySeconds = 10;
+        const pnsDelaySeconds = 30;
         console.log(`Waiting for ${pnsDelaySeconds} seconds for PNS to catch up...`);
         await this.generalService.sleep(pnsDelaySeconds * 1000);
         console.log(`Done waiting for PNS`);
