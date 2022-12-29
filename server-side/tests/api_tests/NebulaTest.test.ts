@@ -3,10 +3,9 @@ import { NebulaTestService } from "./services/nebulatest.service";
 import GeneralService, { TesterFunctions } from "../../potentialQA_SDK/server_side/general.service";
 import { PerformanceManager } from "./services/performance_management/performance_manager";
 import { ResourceManagerService } from "./services/resource_management/resource_manager.service";
-import { AddonData, AddonDataScheme, User } from "@pepperi-addons/papi-sdk";
+import { Account, AddonData, AddonDataScheme, User } from "@pepperi-addons/papi-sdk";
 import { ADALTableService } from "./services/resource_management/adal_table.service";
 import { v4 as uuidv4 } from 'uuid';
-import { NebulaLocalFunctions } from "./services/NebulaLocalFunctions.service";
 import { AddonUUID as testingAddonUUID } from "../../../addon.config.json";
 import { BasicRecord } from "./services/NebulaPNSEmulator.service";
 import jwt from 'jwt-decode';
@@ -530,15 +529,16 @@ export async function NebulaTest(generalService: GeneralService, addonService: G
 
         const CORE_RESOURCES_UUID = 'fc5a5974-3b30-4430-8feb-7d5b9699bc9f';
         const USERS_TABLE = 'users';
+        const ACCOUNTS_TABLE = 'accounts';
 
         async function getUsersToPointTo(): Promise<{ currentUser: User, otherUser: User }> {
             const users = await getUsers();
             
-            const currentUser = users.find(user => { return user.UUID === getCurrentUser() });
-            const otherUser = users.find(user => { return user.UUID !== getCurrentUser() });
+            const currentUser = users.find(user => { return user.UUID === getCurrentUserUUID() });
+            const otherUser = users.find(user => { return user.UUID !== getCurrentUserUUID() });
 
             if (currentUser === undefined || otherUser === undefined) {
-                throw new Error('Distributor does not have enough users to preform test, create a user and try again.');
+                throw new Error('Could not find required users for test, make sure you have at least two users and try again.');
             }
 
             return {
@@ -557,10 +557,57 @@ export async function NebulaTest(generalService: GeneralService, addonService: G
             return users;
         }
 
-        function getCurrentUser(): string {
+        function getCurrentUserUUID(): string {
             const decodedToken: any = jwt(addonService.papiClient['options'].token);
             const currentUser = decodedToken["pepperi.useruuid"];
             return currentUser;
+        }
+
+        async function getAccountsToPointTo(): Promise<{ pointingAccount: Account; otherAccount: Account; }> {
+            // Get data
+            const accounts = await getAccounts();
+            const currentUser = getCurrentUserUUID();
+            const accountsUsers = await getAccountUsers();
+
+            // find an account that points to current user, and one that does not.
+            let accountsThatPoint: string[] = [];
+            accountsUsers.forEach(accountUser => {
+                if (accountUser.User === currentUser) {
+                    accountsThatPoint.push(accountUser.Account);
+                }
+            });
+
+            if (accountsThatPoint.length === accounts.length) {
+                throw new Error('Could not find required accounts for test, make sure you have an account that points to your user and one that does not and try again.');
+            }
+
+            const accountThatPoint = accounts.find(account => { return account.UUID === accountsThatPoint[0] });
+            const accountThatDoesNotPoint = accounts.find(account => { return (accountsThatPoint.includes(account.UUID!) === false) });
+
+            if (accountThatPoint === undefined || accountThatDoesNotPoint === undefined) {
+                throw new Error('Could not find required accounts for test, make sure you have an account that points to your user and one that does not and try again.');
+            }
+
+            return {
+                pointingAccount: accountThatPoint,
+                otherAccount: accountThatDoesNotPoint
+            };
+        }
+
+        async function getAccounts(): Promise<Account[]> {
+            const accounts = await addonService.papiClient.accounts.find();
+
+            if (accounts.length < 2) {
+                throw new Error('Distributor does not have enough accounts to preform test, create an account and try again.');
+            }
+
+            return accounts;
+        }
+
+        async function getAccountUsers(): Promise<any[]> {
+            const accountUsersUrl = `/addons/data/${CORE_RESOURCES_UUID}/account_users`;
+            const accountsUsers = await addonService.papiClient.get(accountUsersUrl);
+            return accountsUsers;
         }
 
         it('Create a table with 6 documents pointing to users, 3 to current user and 3 to another one, call GetDocumentKeysRequiringSyncCommand and expect to get only those that point to current user', async () => {
@@ -607,6 +654,66 @@ export async function NebulaTest(generalService: GeneralService, addonService: G
             }, {
                 Key: documentsThatShouldRequireSync[2],
                 field1: currentUser.UUID
+            }];
+            await pointingSchemaService.upsertBatch(pointingSchemaDocuments);
+
+            // wait for PNS callback to create nodes and edges in graph.
+            await nebulatestService.waitForPNS();
+
+            // Check only documents that points to current user are retrieved.
+            const recordsRequiringSync = await nebulatestService.getRecordsRequiringSync(automationAddonUUID, pointingSchema.Name, timeStampBeforeCreation);
+            expect(recordsRequiringSync).to.not.be.undefined;
+            expect(recordsRequiringSync.length).to.be.equal(3);
+
+            recordsRequiringSync.forEach(recordRequiringSync => {
+                expect(documentsThatShouldRequireSync.includes(recordRequiringSync.Key)).to.be.true;
+            });
+        });
+
+        it('Create a table with 6 documents pointing to accounts, 3 to an account that point to current user and 3 to another, call GetDocumentKeysRequiringSyncCommand and expect to get only those that point to current user', async () => {
+
+            const timeStampBeforeCreation = new Date().toISOString();
+            
+            // Get users & accounts
+            const accounts = await getAccountsToPointTo();
+
+            // Create a table that points to the users table.
+            const pointingSchema: AddonDataScheme = {
+                Name: "nebulaTestPointToUserTable" + getShortUUID(),
+                Type: "data",
+                Fields:
+                {
+                    field1: { 
+                        Type: "Resource",
+                        ApplySystemFilter: true,
+                        AddonUUID: CORE_RESOURCES_UUID,
+                        Resource: ACCOUNTS_TABLE
+                    },
+                },
+                SyncData: {
+                    Sync: true
+                }
+            };
+            const pointingSchemaService: ADALTableService = await resourceManager.createAdalTable(pointingSchema);
+            const documentsThatShouldRequireSync = ['1', '2', '3'];
+            const pointingSchemaDocuments: AddonData[] = [{
+                Key: '4',
+                field1: accounts.otherAccount.UUID
+            }, {
+                Key: '5',
+                field1: accounts.otherAccount.UUID
+            }, {
+                Key: '6',
+                field1: accounts.otherAccount.UUID
+            }, {
+                Key: documentsThatShouldRequireSync[0],
+                field1: accounts.pointingAccount.UUID
+            }, {
+                Key: documentsThatShouldRequireSync[1],
+                field1: accounts.pointingAccount.UUID
+            }, {
+                Key: documentsThatShouldRequireSync[2],
+                field1: accounts.pointingAccount.UUID
             }];
             await pointingSchemaService.upsertBatch(pointingSchemaDocuments);
 
