@@ -746,7 +746,7 @@ export async function NebulaTest(generalService: GeneralService, addonService: G
 
         function getSchema(): AddonDataScheme {
             return {
-                Name: "nebulaTestPointToUserTable" + getShortUUID(),
+                Name: "nebulaTestPointToAccountTable" + getShortUUID(),
                 Type: "data",
                 Fields:
                 {
