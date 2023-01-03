@@ -10,6 +10,21 @@ export interface GetRecordsRequiringSyncResponse {
     HiddenKeys: string[]
 };
 
+export type SystemFilterType = 'None' | 'User' | 'Account';
+
+export interface SystemFilter {
+    Type: SystemFilterType,
+    AccountKey?: string
+};
+
+export interface GetRecordsRequiringSyncParameters {
+    AddonUUID: string,
+    Resource: string,
+    IncludeDeleted: boolean,
+    ModificationDateTime?: string,
+    SystemFilter?: SystemFilter
+};
+
 export class NebulaTestService {
     pnsInsertRecords(testingAddonUUID: string, tableName: string, test_7_items: import("./NebulaPNSEmulator.service").BasicRecord[]) {
         return
@@ -36,7 +51,7 @@ export class NebulaTestService {
     papiClient: PapiClient;
     routerClient: PapiClient;
     generalService: GeneralService;
-    dataObject: any; // the 'Data' object passsed inside the http request sent to start the test -- put all the data you need here
+    dataObject: any; // the 'Data' object passed inside the http request sent to start the test -- put all the data you need here
     distributorUUID: any;
 
     constructor(public systemService: GeneralService, public addonService: PapiClient, dataObject: any) {
@@ -94,11 +109,12 @@ export class NebulaTestService {
         }
     }
 
-    async getRecordsRequiringSync(addonUUID: string, resource: string, ModificationDateTime: string, IncludeDeleted = false): Promise<GetRecordsRequiringSyncResponse> {
+    async getRecordsRequiringSync(parameters: GetRecordsRequiringSyncParameters): Promise<GetRecordsRequiringSyncResponse> {
         try {
-            return await this.routerClient.post(`${this.nebulaGetRecordsRequiresSyncRelativeURL}?addon_uuid=${addonUUID}&resource=${resource}`, {
-                "ModificationDateTime": ModificationDateTime,
-                "IncludeDeleted": IncludeDeleted
+            return await this.routerClient.post(`${this.nebulaGetRecordsRequiresSyncRelativeURL}?addon_uuid=${parameters.AddonUUID}&resource=${parameters.Resource}`, {
+                "ModificationDateTime": parameters.ModificationDateTime,
+                "IncludeDeleted": parameters.IncludeDeleted,
+                "SystemFilter": parameters.SystemFilter
             });
         }
         catch (ex) {

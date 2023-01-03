@@ -1,6 +1,6 @@
 import { PapiClient, Subscription } from "@pepperi-addons/papi-sdk";
 import GeneralService from "../../../potentialQA_SDK/server_side/general.service";
-import { NebulaTestService } from "./nebulatest.service";
+import { GetRecordsRequiringSyncParameters, NebulaTestService } from "./nebulatest.service";
 import { Promise } from "bluebird";
 import { BasicRecord, ModifiedObject, NebulaPNSEmulator, PNSPostBody } from "./NebulaPNSEmulator.service";
 import { AddonUUID as testingAddonUUID } from "../../../../addon.config.json";
@@ -131,15 +131,15 @@ export class NebulaLocalFunctions extends NebulaTestService {
         }
     }
 
-    async getRecordsRequiringSync(addonUUID: string, resource: string, ModificationDateTime: string, IncludeDeleted = false): Promise<{
+    async getRecordsRequiringSync(parameters: GetRecordsRequiringSyncParameters): Promise<{
         Key: string;
         Hidden: boolean;
     }[]> {
         try {
             this.routerClient['options']['baseURL'] = "";
-            const results = (await this.routerClient.post(`${this.nebulaGetRecordsRequiresSyncRelativeURL}?addon_uuid=${addonUUID}&resource=${resource}`, {
-                "ModificationDateTime": ModificationDateTime,
-                "IncludeDeleted": IncludeDeleted
+            const results = (await this.routerClient.post(`${this.nebulaGetRecordsRequiresSyncRelativeURL}?addon_uuid=${parameters.AddonUUID}&resource=${parameters.Resource}`, {
+                "ModificationDateTime": parameters.ModificationDateTime,
+                "IncludeDeleted": parameters.IncludeDeleted
             })).results;
             this.routerClient['options']['baseURL'] = this.originalBaseURL;
             return results;
