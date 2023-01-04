@@ -1,9 +1,10 @@
 import { PapiClient, Subscription } from "@pepperi-addons/papi-sdk";
 import GeneralService from "../../../potentialQA_SDK/server_side/general.service";
-import { GetRecordsRequiringSyncParameters, NebulaTestService } from "./nebulatest.service";
+import { NebulaTestService } from "./nebulatest.service";
 import { Promise } from "bluebird";
-import { BasicRecord, ModifiedObject, NebulaPNSEmulator, PNSPostBody } from "./NebulaPNSEmulator.service";
+import { BasicRecord, NebulaPNSEmulator, PNSPostBody } from "./NebulaPNSEmulator.service";
 import { AddonUUID as testingAddonUUID } from "../../../../addon.config.json";
+import { GetResourcesRequiringSyncParameters, GetResourcesRequiringSyncResponse, GetRecordsRequiringSyncParameters, GetRecordsRequiringSyncResponse } from "../../entities/nebula/types";
 
 export class NebulaLocalFunctions extends NebulaTestService {
 
@@ -109,32 +110,26 @@ export class NebulaLocalFunctions extends NebulaTestService {
         return str.replace(/-/g, '_');
     }
 
-    async getResourcesRequiringSync(ModificationDateTime: string, IncludeDeleted = false): Promise<{
-        AddonUUID: string;
-        Resource: string;
-        Hidden: boolean;
-    }[]> {
+    async getResourcesRequiringSync(parameters: GetResourcesRequiringSyncParameters): Promise<GetResourcesRequiringSyncResponse[]> {
         try {
             this.routerClient['options']['baseURL'] = "";
             const results = (await this.routerClient.post(this.nebulaGetResourcesRequiringSyncRelativeURL, {
-                "ModificationDateTime": ModificationDateTime,
-                "IncludeDeleted": IncludeDeleted
+                ModificationDateTime: parameters.ModificationDateTime,
+                IncludeDeleted: parameters.IncludeDeleted,
+                SystemFilter: parameters.SystemFilter
             })).results;
             this.routerClient['options']['baseURL'] = this.originalBaseURL;
             return results;
 
         }
-        catch (ex) {
-            console.error(`Error in getSchemasRequiringSync: ${ex}`);
+        catch (error) {
+            console.error(`Error in getSchemasRequiringSync: ${(error as Error).message}`);
             this.routerClient['options']['baseURL'] = this.originalBaseURL;
-            throw new Error((ex as { message: string }).message);
+            throw error;
         }
     }
 
-    async getRecordsRequiringSync(parameters: GetRecordsRequiringSyncParameters): Promise<{
-        Key: string;
-        Hidden: boolean;
-    }[]> {
+    async getRecordsRequiringSync(parameters: GetRecordsRequiringSyncParameters): Promise<GetRecordsRequiringSyncResponse[]> {
         try {
             this.routerClient['options']['baseURL'] = "";
             const results = (await this.routerClient.post(`${this.nebulaGetRecordsRequiresSyncRelativeURL}?addon_uuid=${parameters.AddonUUID}&resource=${parameters.Resource}`, {
@@ -144,10 +139,10 @@ export class NebulaLocalFunctions extends NebulaTestService {
             this.routerClient['options']['baseURL'] = this.originalBaseURL;
             return results;
         }
-        catch (ex) {
-            console.error(`Error in getRecordsRequiringSync: ${ex}`);
+        catch (error) {
+            console.error(`Error in getRecordsRequiringSync: ${(error as Error).message}`);
             this.routerClient['options']['baseURL'] = this.originalBaseURL;
-            throw new Error((ex as { message: string }).message);
+            throw error;
         }
     }
 
