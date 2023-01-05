@@ -5,6 +5,11 @@ import {
 import GeneralService from '../../../potentialQA_SDK/server_side/general.service';
 import jwtDecode from "jwt-decode";
 
+export interface GetRecordsRequiringSyncResponse {
+    Keys: string[],
+    HiddenKeys: string[]
+};
+
 export class NebulaTestService {
     pnsInsertRecords(testingAddonUUID: string, tableName: string, test_7_items: import("./NebulaPNSEmulator.service").BasicRecord[]) {
         return
@@ -89,15 +94,12 @@ export class NebulaTestService {
         }
     }
 
-    async getRecordsRequiringSync(addonUUID: string, resource: string, ModificationDateTime: string, IncludeDeleted = false): Promise<{
-        Key: string;
-        Hidden: boolean;
-    }[]> {
+    async getRecordsRequiringSync(addonUUID: string, resource: string, ModificationDateTime: string, IncludeDeleted = false): Promise<GetRecordsRequiringSyncResponse> {
         try {
-            return (await this.routerClient.post(`${this.nebulaGetRecordsRequiresSyncRelativeURL}?addon_uuid=${addonUUID}&resource=${resource}`, {
+            return await this.routerClient.post(`${this.nebulaGetRecordsRequiresSyncRelativeURL}?addon_uuid=${addonUUID}&resource=${resource}`, {
                 "ModificationDateTime": ModificationDateTime,
                 "IncludeDeleted": IncludeDeleted
-            })).results;
+            });
         }
         catch (ex) {
             console.error(`Error in getRecordsRequiringSync: ${ex}`);

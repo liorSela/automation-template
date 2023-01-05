@@ -330,9 +330,9 @@ export async function NebulaTest(generalService: GeneralService, addonService: G
             console.log(`recordsRequiringSyncX: ${JSON.stringify(recordsRequiringSyncX)}`);
 
             // check that the records are in the list
-            expect(recordsRequiringSyncX.length).to.equal(10);
+            expect(recordsRequiringSyncX.Keys.length).to.equal(10);
             for (let i = 0; i < 10; i++) {
-                expect(recordsRequiringSyncX.find(record => record.Key === `test_3_item_${i}`)).to.not.equal(undefined);
+                expect(recordsRequiringSyncX.Keys.find(recordKey => recordKey === `test_3_item_${i}`)).to.not.equal(undefined);
             }
 
             // save current time Y
@@ -350,7 +350,7 @@ export async function NebulaTest(generalService: GeneralService, addonService: G
             console.log(`recordsRequiringSyncY: ${JSON.stringify(recordsRequiringSyncY)}`);
 
             // check that the records are not in the list
-            expect(recordsRequiringSyncY.length).to.equal(0);
+            expect(recordsRequiringSyncY.Keys.length).to.equal(0);
 
             // add 10 items to the table
             const test_3_items2: BasicRecord[] = [];
@@ -373,9 +373,9 @@ export async function NebulaTest(generalService: GeneralService, addonService: G
             console.log(`recordsRequiringSyncY2: ${JSON.stringify(recordsRequiringSyncY2)}`);
 
             // check that the records are in the list
-            expect(recordsRequiringSyncY2.length).to.equal(10);
+            expect(recordsRequiringSyncY2.Keys.length).to.equal(10);
             for (let i = 10; i < 20; i++) {
-                expect(recordsRequiringSyncY2.find(record => record.Key === `test_3_item_${i}`)).to.not.equal(undefined);
+                expect(recordsRequiringSyncY2.Keys.find(recordKey => recordKey === `test_3_item_${i}`)).to.not.equal(undefined);
             }
 
             performanceManager.stopMeasure("Test 3");
@@ -439,7 +439,7 @@ export async function NebulaTest(generalService: GeneralService, addonService: G
             console.log(`recordsRequiringSyncX: ${JSON.stringify(recordsRequiringSyncX)}`);
 
             // check that the records are not in the list
-            expect(recordsRequiringSyncX.length).to.equal(0);
+            expect(recordsRequiringSyncX.Keys.length).to.equal(0);
 
             // get resources requiring sync using X with IncludeDeleted = true
             const resourcesRequiringSyncX2 = await nebulatestService.getResourcesRequiringSync(currentTimeX, true);
@@ -453,9 +453,9 @@ export async function NebulaTest(generalService: GeneralService, addonService: G
             console.log(`recordsRequiringSyncX2: ${JSON.stringify(recordsRequiringSyncX2)}`);
 
             // check that the records are in the list
-            expect(recordsRequiringSyncX2.length).to.equal(10);
+            expect(recordsRequiringSyncX2.HiddenKeys.length).to.equal(10);
             for (let i = 0; i < 10; i++) {
-                expect(recordsRequiringSyncX2.find(record => record.Key === `test_4_item_${i}`)).to.not.equal(undefined);
+                expect(recordsRequiringSyncX2.HiddenKeys.find(recordKey => recordKey === `test_4_item_${i}`)).to.not.equal(undefined);
             }
 
             performanceManager.stopMeasure("Test 4");
@@ -643,10 +643,10 @@ export async function NebulaTest(generalService: GeneralService, addonService: G
             // Check only documents that points to current user are retrieved.
             let recordsRequiringSync = await nebulatestService.getRecordsRequiringSync(automationAddonUUID, pointingSchemaName, timeStampBeforeCreation);
             expect(recordsRequiringSync).to.not.be.undefined;
-            expect(recordsRequiringSync.length).to.be.equal(3);
+            expect(recordsRequiringSync.Keys.length).to.be.equal(3);
 
-            recordsRequiringSync.forEach(recordRequiringSync => {
-                expect(documentsThatShouldRequireSync.includes(recordRequiringSync.Key)).to.be.true;
+            recordsRequiringSync.Keys.forEach(recordKeyRequiringSync => {
+                expect(documentsThatShouldRequireSync.includes(recordKeyRequiringSync)).to.be.true;
             });
         });
 
@@ -675,13 +675,13 @@ export async function NebulaTest(generalService: GeneralService, addonService: G
             assertInitialPreparations();
             
             // Check only documents that points to current user are retrieved.
-            const recordsRequiringSync = await nebulatestService.getRecordsRequiringSync(automationAddonUUID, pointingSchemaService!.schemaName!, timeStampBeforeCreation);
-            expect(recordsRequiringSync).to.not.be.undefined;
-            expect(recordsRequiringSync.length).to.be.equal(3);
+            const recordsKeysRequiringSync = await nebulatestService.getRecordsRequiringSync(automationAddonUUID, pointingSchemaService!.schemaName!, timeStampBeforeCreation);
+            expect(recordsKeysRequiringSync).to.not.be.undefined;
+            expect(recordsKeysRequiringSync.Keys.length).to.be.equal(3);
 
             // Check updated document's edges.
-            expect(recordsRequiringSync.find(record => record.Key === documentThatShouldRequireSync)).to.not.be.undefined;
-            expect(recordsRequiringSync.find(record => record.Key === documentThatShouldNotRequireSync)).to.be.undefined;
+            expect(recordsKeysRequiringSync.Keys.find(recordKey => recordKey === documentThatShouldRequireSync)).to.not.be.undefined;
+            expect(recordsKeysRequiringSync.Keys.find(recordKey => recordKey === documentThatShouldNotRequireSync)).to.be.undefined;
         });
 
         it(`Cleanup Of All Inserted Data and print performance statistics`, async () => {
@@ -822,12 +822,12 @@ export async function NebulaTest(generalService: GeneralService, addonService: G
             const schemaName = pointingSchemaService!.schemaName;
             
             // Check only documents that points to "current account" (account that point to current user) are retrieved.
-            const recordsRequiringSync = await nebulatestService.getRecordsRequiringSync(automationAddonUUID, schemaName, timeStampBeforeCreation);
-            expect(recordsRequiringSync).to.not.be.undefined;
-            expect(recordsRequiringSync.length).to.be.equal(3);
+            const recordsKeysRequiringSync = await nebulatestService.getRecordsRequiringSync(automationAddonUUID, schemaName, timeStampBeforeCreation);
+            expect(recordsKeysRequiringSync).to.not.be.undefined;
+            expect(recordsKeysRequiringSync.Keys.length).to.be.equal(3);
 
-            recordsRequiringSync.forEach(recordRequiringSync => {
-                expect(documentsThatShouldRequireSync.includes(recordRequiringSync.Key)).to.be.true;
+            recordsKeysRequiringSync.Keys.forEach(recordKeyRequiringSync => {
+                expect(documentsThatShouldRequireSync.includes(recordKeyRequiringSync)).to.be.true;
             });
         });
 
@@ -857,13 +857,13 @@ export async function NebulaTest(generalService: GeneralService, addonService: G
             const schemaName = pointingSchemaService!.schemaName;
 
             // Check only documents that points to "current account" are retrieved.
-            const recordsRequiringSync = await nebulatestService.getRecordsRequiringSync(automationAddonUUID, schemaName, timeStampBeforeCreation);
-            expect(recordsRequiringSync).to.not.be.undefined;
-            expect(recordsRequiringSync.length).to.be.equal(3);
+            const recordsKeysRequiringSync = await nebulatestService.getRecordsRequiringSync(automationAddonUUID, schemaName, timeStampBeforeCreation);
+            expect(recordsKeysRequiringSync).to.not.be.undefined;
+            expect(recordsKeysRequiringSync.Keys.length).to.be.equal(3);
 
             // Check updated document's edges.
-            expect(recordsRequiringSync.find(record => record.Key === documentThatShouldRequireSync)).to.not.be.undefined;
-            expect(recordsRequiringSync.find(record => record.Key === documentThatShouldNotRequireSync)).to.be.undefined;
+            expect(recordsKeysRequiringSync.Keys.find(recordKey => recordKey === documentThatShouldRequireSync)).to.not.be.undefined;
+            expect(recordsKeysRequiringSync.Keys.find(recordKey => recordKey === documentThatShouldNotRequireSync)).to.be.undefined;
         });
 
         it(`Cleanup Of All Inserted Data and print performance statistics`, async () => {
