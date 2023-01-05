@@ -2,7 +2,12 @@
 import { PapiClient } from '@pepperi-addons/papi-sdk';
 import GeneralService from '../../../potentialQA_SDK/server_side/general.service';
 import jwtDecode from "jwt-decode";
-import { GetResourcesRequiringSyncParameters, GetResourcesRequiringSyncResponse, GetRecordsRequiringSyncParameters, GetRecordsRequiringSyncResponse } from '../../entities/nebula/types';
+import { GetResourcesRequiringSyncParameters, GetResourcesRequiringSyncResponse, GetRecordsRequiringSyncParameters } from '../../entities/nebula/types';
+
+export interface GetRecordsRequiringSyncResponse {
+    Keys: string[],
+    HiddenKeys: string[]
+};
 
 export class NebulaTestService {
     pnsInsertRecords(testingAddonUUID: string, tableName: string, test_7_items: import("./NebulaPNSEmulator.service").BasicRecord[]) {
