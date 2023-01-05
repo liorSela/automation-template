@@ -1,9 +1,8 @@
 //00000000-0000-0000-0000-000000006a91
-import {
-    PapiClient,
-} from '@pepperi-addons/papi-sdk';
+import { PapiClient } from '@pepperi-addons/papi-sdk';
 import GeneralService from '../../../potentialQA_SDK/server_side/general.service';
 import jwtDecode from "jwt-decode";
+import { GetResourcesRequiringSyncParameters, GetResourcesRequiringSyncResponse, GetRecordsRequiringSyncParameters } from '../../entities/nebula/types';
 
 export interface GetRecordsRequiringSyncResponse {
     Keys: string[],
@@ -36,7 +35,7 @@ export class NebulaTestService {
     papiClient: PapiClient;
     routerClient: PapiClient;
     generalService: GeneralService;
-    dataObject: any; // the 'Data' object passsed inside the http request sent to start the test -- put all the data you need here
+    dataObject: any; // the 'Data' object passed inside the http request sent to start the test -- put all the data you need here
     distributorUUID: any;
 
     constructor(public systemService: GeneralService, public addonService: PapiClient, dataObject: any) {
@@ -64,46 +63,31 @@ export class NebulaTestService {
         return str.replace(/-/g, '_');
     }
 
-    // can no longer be done without Nebula secret key
-    // async sendCypherToNebula(cypher: string) {
-    //     try {
-    //         return await this.routerClient.post(this.nebulaCypherRelativeURL, {
-    //             "Query": cypher
-    //         });
-    //     }
-    //     catch (ex) {
-    //         console.error(`Error in sendCypherToNebula: ${ex}`);
-    //         throw new Error((ex as { message: string }).message);
-    //     }
-    // }
-
-    async getResourcesRequiringSync(ModificationDateTime: string, IncludeDeleted = false): Promise<{
-        AddonUUID: string;
-        Resource: string;
-        Hidden: boolean;
-    }[]> {
+    async getResourcesRequiringSync(parameters: GetResourcesRequiringSyncParameters): Promise<GetResourcesRequiringSyncResponse[]> {
         try {
             return (await this.routerClient.post(this.nebulaGetResourcesRequiringSyncRelativeURL, {
-                "ModificationDateTime": ModificationDateTime,
-                "IncludeDeleted": IncludeDeleted
+                ModificationDateTime: parameters.ModificationDateTime,
+                IncludeDeleted: parameters.IncludeDeleted ?? false,
+                SystemFilter: parameters.SystemFilter
             })).results;
         }
-        catch (ex) {
-            console.error(`Error in getSchemasRequiringSync: ${ex}`);
-            throw new Error((ex as { message: string }).message);
+        catch (error) {
+            console.error(`Error in getSchemasRequiringSync: ${(error as Error).message}`);
+            throw error;
         }
     }
 
-    async getRecordsRequiringSync(addonUUID: string, resource: string, ModificationDateTime: string, IncludeDeleted = false): Promise<GetRecordsRequiringSyncResponse> {
+    async getRecordsRequiringSync(parameters: GetRecordsRequiringSyncParameters): Promise<GetRecordsRequiringSyncResponse> {
         try {
-            return await this.routerClient.post(`${this.nebulaGetRecordsRequiresSyncRelativeURL}?addon_uuid=${addonUUID}&resource=${resource}`, {
-                "ModificationDateTime": ModificationDateTime,
-                "IncludeDeleted": IncludeDeleted
+            return await this.routerClient.post(`${this.nebulaGetRecordsRequiresSyncRelativeURL}?addon_uuid=${parameters.AddonUUID}&resource=${parameters.Resource}`, {
+                ModificationDateTime: parameters.ModificationDateTime,
+                IncludeDeleted: parameters.IncludeDeleted,
+                SystemFilter: parameters.SystemFilter
             });
         }
-        catch (ex) {
-            console.error(`Error in getRecordsRequiringSync: ${ex}`);
-            throw new Error((ex as { message: string }).message);
+        catch (error) {
+            console.error(`Error in getRecordsRequiringSync: ${(error as Error).message}`);
+            throw error;
         }
     }
 
@@ -122,7 +106,9 @@ export class NebulaTestService {
         }
     }
 
-    // wait for x seconds depending on the current PNS delay time
+    /**
+     * wait for 30 seconds
+     */
     async waitForPNS() {
         const pnsDelaySeconds = 30;
         console.log(`Waiting for ${pnsDelaySeconds} seconds for PNS to catch up...`);

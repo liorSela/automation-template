@@ -9,6 +9,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { AddonUUID as testingAddonUUID } from "../../../addon.config.json";
 import { BasicRecord } from "./services/NebulaPNSEmulator.service";
 import jwt from 'jwt-decode';
+import { SystemFilter, GetRecordsRequiringSyncParameters, GetResourcesRequiringSyncParameters, SystemFilterType } from "../entities/nebula/types";
 
 export async function NebulaTest(generalService: GeneralService, addonService: GeneralService, request, tester: TesterFunctions) {
     
@@ -27,6 +28,24 @@ export async function NebulaTest(generalService: GeneralService, addonService: G
         //TODO: add PNS cleanup here
         await resourceManager.cleanup();
         console.log(JSON.stringify(performanceManager.getStatistics()));
+    }
+
+    function buildGetRecordsRequiringSyncParameters(tableName: string, modificationDateTime: string, includeDeleted: boolean = false, filter: SystemFilter | undefined = undefined): GetRecordsRequiringSyncParameters {
+        return {
+            AddonUUID: automationAddonUUID,
+            Resource: tableName,
+            ModificationDateTime: modificationDateTime,
+            IncludeDeleted: includeDeleted,
+            SystemFilter: filter
+        };
+    }
+
+    function buildGetResourcesRequiringSyncParameters(modificationDateTime: string, includeDeleted: boolean = false, filter: SystemFilter | undefined = undefined): GetResourcesRequiringSyncParameters {
+        return {
+            ModificationDateTime: modificationDateTime,
+            IncludeDeleted: includeDeleted,
+            SystemFilter: filter
+        };
     }
 
     describe('NebulaTest Suites', () => {
@@ -319,14 +338,16 @@ export async function NebulaTest(generalService: GeneralService, addonService: G
             await nebulatestService.waitForPNS();
 
             // get resources requiring sync using X
-            const resourcesRequiringSyncX = await nebulatestService.getResourcesRequiringSync(currentTimeX);
+            let getResourcesRequiringSyncParameters = buildGetResourcesRequiringSyncParameters(currentTimeX);
+            const resourcesRequiringSyncX = await nebulatestService.getResourcesRequiringSync(getResourcesRequiringSyncParameters);
             console.log(`resourcesRequiringSyncX: ${JSON.stringify(resourcesRequiringSyncX)}`);
 
             // check that the resource is in the list
             expect(resourcesRequiringSyncX.find(resource => resource.Resource === tableName)).to.not.equal(undefined);
 
             // get records requiring sync using X
-            const recordsRequiringSyncX = await nebulatestService.getRecordsRequiringSync(automationAddonUUID, tableName, currentTimeX);
+            let getRecordsRequiringSyncParams = buildGetRecordsRequiringSyncParameters(tableName, currentTimeX);
+            const recordsRequiringSyncX = await nebulatestService.getRecordsRequiringSync(getRecordsRequiringSyncParams);
             console.log(`recordsRequiringSyncX: ${JSON.stringify(recordsRequiringSyncX)}`);
 
             // check that the records are in the list
@@ -339,14 +360,16 @@ export async function NebulaTest(generalService: GeneralService, addonService: G
             const currentTimeY = new Date().toISOString();
 
             // get resources requiring sync using Y
-            const resourcesRequiringSyncY = await nebulatestService.getResourcesRequiringSync(currentTimeY);
+            getResourcesRequiringSyncParameters = buildGetResourcesRequiringSyncParameters(currentTimeY);
+            const resourcesRequiringSyncY = await nebulatestService.getResourcesRequiringSync(getResourcesRequiringSyncParameters);
             console.log(`resourcesRequiringSyncY: ${JSON.stringify(resourcesRequiringSyncY)}`);
 
             // check that the resource is not in the list
             expect(resourcesRequiringSyncY.find(resource => resource.Resource === tableName)).to.equal(undefined);
 
             // get records requiring sync using Y
-            const recordsRequiringSyncY = await nebulatestService.getRecordsRequiringSync(automationAddonUUID, tableName, currentTimeY);
+            getRecordsRequiringSyncParams = buildGetRecordsRequiringSyncParameters(tableName, currentTimeY);
+            const recordsRequiringSyncY = await nebulatestService.getRecordsRequiringSync(getRecordsRequiringSyncParams);
             console.log(`recordsRequiringSyncY: ${JSON.stringify(recordsRequiringSyncY)}`);
 
             // check that the records are not in the list
@@ -369,7 +392,8 @@ export async function NebulaTest(generalService: GeneralService, addonService: G
             await nebulatestService.waitForPNS();
 
             // get records requiring sync using Y
-            const recordsRequiringSyncY2 = await nebulatestService.getRecordsRequiringSync(automationAddonUUID, tableName, currentTimeY);
+            getRecordsRequiringSyncParams = buildGetRecordsRequiringSyncParameters(tableName, currentTimeY);
+            const recordsRequiringSyncY2 = await nebulatestService.getRecordsRequiringSync(getRecordsRequiringSyncParams);
             console.log(`recordsRequiringSyncY2: ${JSON.stringify(recordsRequiringSyncY2)}`);
 
             // check that the records are in the list
@@ -428,28 +452,32 @@ export async function NebulaTest(generalService: GeneralService, addonService: G
             console.log(`added items to table test_4_table_service: ${JSON.stringify(test_4_items)}`);
 
             // get resources requiring sync using X
-            const resourcesRequiringSyncX = await nebulatestService.getResourcesRequiringSync(currentTimeX);
+            let getResourcesRequiringSyncParameters = buildGetResourcesRequiringSyncParameters(currentTimeX);
+            const resourcesRequiringSyncX = await nebulatestService.getResourcesRequiringSync(getResourcesRequiringSyncParameters);
             console.log(`resourcesRequiringSyncX: ${JSON.stringify(resourcesRequiringSyncX)}`);
 
             // check that the resource is not in the list
             expect(resourcesRequiringSyncX.find(resource => resource.Resource === tableName)).to.equal(undefined);
 
             // get records requiring sync using X
-            const recordsRequiringSyncX = await nebulatestService.getRecordsRequiringSync(automationAddonUUID, tableName, currentTimeX);
+            let getRecordsRequiringSyncParams = buildGetRecordsRequiringSyncParameters(tableName, currentTimeX);
+            const recordsRequiringSyncX = await nebulatestService.getRecordsRequiringSync(getRecordsRequiringSyncParams);
             console.log(`recordsRequiringSyncX: ${JSON.stringify(recordsRequiringSyncX)}`);
 
             // check that the records are not in the list
             expect(recordsRequiringSyncX.Keys.length).to.equal(0);
 
             // get resources requiring sync using X with IncludeDeleted = true
-            const resourcesRequiringSyncX2 = await nebulatestService.getResourcesRequiringSync(currentTimeX, true);
+            getResourcesRequiringSyncParameters = buildGetResourcesRequiringSyncParameters(currentTimeX, true);
+            const resourcesRequiringSyncX2 = await nebulatestService.getResourcesRequiringSync(getResourcesRequiringSyncParameters);
             console.log(`resourcesRequiringSyncX2: ${JSON.stringify(resourcesRequiringSyncX2)}`);
 
             // check that the resource is in the list
             expect(resourcesRequiringSyncX2.find(resource => resource.Resource === tableName)).to.not.equal(undefined);
 
             // get records requiring sync using X with IncludeDeleted = true
-            const recordsRequiringSyncX2 = await nebulatestService.getRecordsRequiringSync(automationAddonUUID, tableName, currentTimeX, true);
+            getRecordsRequiringSyncParams = buildGetRecordsRequiringSyncParameters(tableName, currentTimeX, true);
+            const recordsRequiringSyncX2 = await nebulatestService.getRecordsRequiringSync(getRecordsRequiringSyncParams);
             console.log(`recordsRequiringSyncX2: ${JSON.stringify(recordsRequiringSyncX2)}`);
 
             // check that the records are in the list
@@ -523,7 +551,7 @@ export async function NebulaTest(generalService: GeneralService, addonService: G
         });
     });
 
-    describe('GetDocumentKeysRequiringSyncCommand Suite - users reference fields', async () => {
+    describe('GetDocumentKeysRequiringSync - users reference fields without system filter (type=None)', async () => {
         // services
         const nebulatestService = new NebulaTestService(generalService, addonService.papiClient, dataObj);
         const performanceManager: PerformanceManager = new PerformanceManager();
@@ -641,7 +669,8 @@ export async function NebulaTest(generalService: GeneralService, addonService: G
             const pointingSchemaName: string = pointingSchemaService!.schemaName!;
 
             // Check only documents that points to current user are retrieved.
-            let recordsRequiringSync = await nebulatestService.getRecordsRequiringSync(automationAddonUUID, pointingSchemaName, timeStampBeforeCreation);
+            const getRecordsRequiringSyncParams = buildGetRecordsRequiringSyncParameters(pointingSchemaService!.schemaName!, timeStampBeforeCreation);
+            let recordsRequiringSync = await nebulatestService.getRecordsRequiringSync(getRecordsRequiringSyncParams);
             expect(recordsRequiringSync).to.not.be.undefined;
             expect(recordsRequiringSync.Keys.length).to.be.equal(3);
 
@@ -675,7 +704,8 @@ export async function NebulaTest(generalService: GeneralService, addonService: G
             assertInitialPreparations();
             
             // Check only documents that points to current user are retrieved.
-            const recordsKeysRequiringSync = await nebulatestService.getRecordsRequiringSync(automationAddonUUID, pointingSchemaService!.schemaName!, timeStampBeforeCreation);
+            const getRecordsRequiringSyncParams = buildGetRecordsRequiringSyncParameters(pointingSchemaService!.schemaName!, timeStampBeforeCreation);
+            const recordsKeysRequiringSync = await nebulatestService.getRecordsRequiringSync(getRecordsRequiringSyncParams);
             expect(recordsKeysRequiringSync).to.not.be.undefined;
             expect(recordsKeysRequiringSync.Keys.length).to.be.equal(3);
 
@@ -689,7 +719,7 @@ export async function NebulaTest(generalService: GeneralService, addonService: G
         });
     });
 
-    describe('GetDocumentKeysRequiringSyncCommand Suite - account reference fields', async () => {
+    describe('GetDocumentKeysRequiringSync - account reference fields without system filter (type=None)', async () => {
         // services
         const nebulatestService = new NebulaTestService(generalService, addonService.papiClient, dataObj);
         const performanceManager: PerformanceManager = new PerformanceManager();
@@ -819,10 +849,10 @@ export async function NebulaTest(generalService: GeneralService, addonService: G
 
         it('Call getRecordsRequiringSync, expect only documents pointing to "current account" (account that point to current user) in result', async () => {
             assertInitialPreparations();
-            const schemaName = pointingSchemaService!.schemaName;
             
             // Check only documents that points to "current account" (account that point to current user) are retrieved.
-            const recordsKeysRequiringSync = await nebulatestService.getRecordsRequiringSync(automationAddonUUID, schemaName, timeStampBeforeCreation);
+            const getRecordsRequiringSyncParams = buildGetRecordsRequiringSyncParameters(pointingSchemaService!.schemaName, timeStampBeforeCreation);
+            const recordsKeysRequiringSync = await nebulatestService.getRecordsRequiringSync(getRecordsRequiringSyncParams);
             expect(recordsKeysRequiringSync).to.not.be.undefined;
             expect(recordsKeysRequiringSync.Keys.length).to.be.equal(3);
 
@@ -857,7 +887,8 @@ export async function NebulaTest(generalService: GeneralService, addonService: G
             const schemaName = pointingSchemaService!.schemaName;
 
             // Check only documents that points to "current account" are retrieved.
-            const recordsKeysRequiringSync = await nebulatestService.getRecordsRequiringSync(automationAddonUUID, schemaName, timeStampBeforeCreation);
+            const getRecordsRequiringSyncParams = buildGetRecordsRequiringSyncParameters(pointingSchemaService!.schemaName, timeStampBeforeCreation);
+            const recordsKeysRequiringSync = await nebulatestService.getRecordsRequiringSync(getRecordsRequiringSyncParams);
             expect(recordsKeysRequiringSync).to.not.be.undefined;
             expect(recordsKeysRequiringSync.Keys.length).to.be.equal(3);
 
@@ -870,6 +901,315 @@ export async function NebulaTest(generalService: GeneralService, addonService: G
             await cleanUp(resourceManager, performanceManager);
         });
     });
+
+    describe('GetDocumentKeysRequiringSync - account reference fields with system filter (type=Account)', async () => {
+        // services
+        const nebulatestService = new NebulaTestService(generalService, addonService.papiClient, dataObj);
+        const performanceManager: PerformanceManager = new PerformanceManager();
+        const resourceManager: ResourceManagerService = new ResourceManagerService(addonService.papiClient, automationAddonUUID);
+
+        const ACCOUNTS_TABLE = 'accounts';
+
+        async function getAccountsToPointTo(): Promise<Accounts> {
+            // Get data
+            const accounts = await getAccounts();
+            const currentUserUUID: string = getCurrentUserUUID(addonService.papiClient);
+            const accountsUsers = await getAccountUsers();
+
+            // find an account that points to current user, and one that does not.
+            let accountsThatPoint: string[] = [];
+            accountsUsers.forEach(accountUser => {
+                if (accountUser.User === currentUserUUID) {
+                    accountsThatPoint.push(accountUser.Account);
+                }
+            });
+
+            if (accountsThatPoint.length === accounts.length) {
+                throw new Error('Could not find required accounts for test, make sure you have an account that points to your user and one that does not and try again.');
+            }
+
+            const accountThatPoint = accounts.find(account => { return account.UUID === accountsThatPoint[0] });
+            const accountThatDoesNotPoint = accounts.find(account => { return (accountsThatPoint.includes(account.UUID!) === false) });
+
+            if (accountThatPoint === undefined || accountThatDoesNotPoint === undefined) {
+                throw new Error('Could not find required accounts for test, make sure you have an account that points to your user and one that does not and try again.');
+            }
+
+            return {
+                pointingAccount: accountThatPoint,
+                otherAccount: accountThatDoesNotPoint
+            };
+        }
+
+        async function getAccounts(): Promise<Account[]> {
+            const accounts = await addonService.papiClient.accounts.find();
+
+            if (accounts.length < 2) {
+                throw new Error('Distributor does not have enough accounts to preform test, create an account and try again.');
+            }
+
+            return accounts;
+        }
+
+        async function getAccountUsers(): Promise<any[]> {
+            const accountUsersUrl = `/addons/data/${CORE_RESOURCES_UUID}/account_users`;
+            const accountsUsers = await addonService.papiClient.get(accountUsersUrl);
+            return accountsUsers;
+        }
+
+        function getSchema(): AddonDataScheme {
+            return {
+                Name: "nebulaTestPointToAccountTable" + getShortUUID(),
+                Type: "data",
+                Fields:
+                {
+                    field1: { 
+                        Type: "Resource",
+                        ApplySystemFilter: true,
+                        AddonUUID: CORE_RESOURCES_UUID,
+                        Resource: ACCOUNTS_TABLE
+                    },
+                },
+                SyncData: {
+                    Sync: true
+                }
+            };
+        }
+
+        /**
+         * Check if schema was created, if not throws.
+         */
+        function assertInitialPreparations(): void {
+            if (pointingSchemaService === undefined) {
+                throw new Error(`Schema was not created, cannot run test`);
+            }
+
+            if (accounts === undefined) {
+                throw new Error(`Failed fetching accounts, cannot run test`);
+            }
+        }
+
+        // Preparations parameters
+        const timeStampBeforeCreation = new Date().toISOString();
+        type Accounts = { pointingAccount: Account; otherAccount: Account; };
+        let accounts: Accounts | undefined = undefined;
+        const documentsThatPointA = ['1', '2', '3'];
+        const documentsThatPointB = ['4', '5', '6'];
+        let pointingSchemaService: ADALTableService| undefined = undefined;
+
+        function buildSystemFilter(accountUUID: string): SystemFilter {
+            return {
+                Type: "Account",
+                AccountKey: accountUUID
+            };
+        }
+
+        it('Preparations - create table, upsert documents and wait for PNS', async () => {
+
+            // Create a table that points to the accounts table.
+            const pointingSchema: AddonDataScheme = getSchema();
+            accounts = await getAccountsToPointTo();
+            pointingSchemaService = await resourceManager.createAdalTable(pointingSchema);
+
+            // Upsert documents, half points to current account, and the others to a different one.
+            const pointingSchemaDocuments: AddonData[] = [{
+                Key: documentsThatPointB[0],
+                field1: accounts.otherAccount.UUID
+            }, {
+                Key: documentsThatPointB[1],
+                field1: accounts.otherAccount.UUID
+            }, {
+                Key: documentsThatPointB[2],
+                field1: accounts.otherAccount.UUID
+            }, {
+                Key: documentsThatPointA[0],
+                field1: accounts.pointingAccount.UUID
+            }, {
+                Key: documentsThatPointA[1],
+                field1: accounts.pointingAccount.UUID
+            }, {
+                Key: documentsThatPointA[2],
+                field1: accounts.pointingAccount.UUID
+            }];
+            await pointingSchemaService!.upsertBatch(pointingSchemaDocuments);
+
+            // wait for PNS callback to create nodes and edges in graph.
+            await nebulatestService.waitForPNS();
+        });
+
+        it('Call getRecordsRequiringSync, expect only documents pointing to given account in result', async () => {
+            assertInitialPreparations();
+            
+            // Check only documents that points to "current account" (account that point to current user) are retrieved.
+            accounts = await getAccountsToPointTo();
+            const filter = buildSystemFilter(accounts.pointingAccount.UUID!) 
+            const getRecordsRequiringSyncParams = buildGetRecordsRequiringSyncParameters(pointingSchemaService!.schemaName, timeStampBeforeCreation, false, filter);
+            const recordsKeysRequiringSync = await nebulatestService.getRecordsRequiringSync(getRecordsRequiringSyncParams);
+            expect(recordsKeysRequiringSync).to.not.be.undefined;
+            expect(recordsKeysRequiringSync.Keys.length).to.be.equal(3);
+
+            recordsKeysRequiringSync.Keys.forEach(recordKeyRequiringSync => {
+                expect(documentsThatPointA.includes(recordKeyRequiringSync)).to.be.true;
+            });
+        });
+
+        it('Call getRecordsRequiringSync with a different account UUID in filter, expect only documents pointing to given account in result', async () => {
+            assertInitialPreparations();
+            
+            // Check only documents that points to "current account" (account that point to current user) are retrieved.
+            accounts = await getAccountsToPointTo();
+            const filter = buildSystemFilter(accounts.otherAccount.UUID!) 
+            const getRecordsRequiringSyncParams = buildGetRecordsRequiringSyncParameters(pointingSchemaService!.schemaName, timeStampBeforeCreation, false, filter);
+            const recordsKeysRequiringSync = await nebulatestService.getRecordsRequiringSync(getRecordsRequiringSyncParams);
+            expect(recordsKeysRequiringSync).to.not.be.undefined;
+            expect(recordsKeysRequiringSync.Keys.length).to.be.equal(3);
+
+            recordsKeysRequiringSync.Keys.forEach(recordKeyRequiringSync => {
+                expect(documentsThatPointB.includes(recordKeyRequiringSync)).to.be.true;
+            });
+        });
+
+        it(`Cleanup Of All Inserted Data and print performance statistics`, async () => {
+            await cleanUp(resourceManager, performanceManager);
+        });
+    });
+
+    describe('GetSchemasRequiringSync - system filter', async () => {
+        const nebulatestService = new NebulaTestService(generalService, addonService.papiClient, dataObj);
+        const performanceManager: PerformanceManager = new PerformanceManager();
+        const resourceManager: ResourceManagerService = new ResourceManagerService(addonService.papiClient, automationAddonUUID);
+
+        const ACCOUNTS_TABLE = 'accounts';
+        const USERS_TABLE = 'users';
+
+        // Preparations parameters
+        const timeStampBeforeCreation = new Date().toISOString();
+        let usersSchemaService: ADALTableService| undefined = undefined;
+        let accountsSchemaService: ADALTableService| undefined = undefined;
+
+        function buildSystemFilter(type: SystemFilterType): SystemFilter {
+            return {
+                Type:type
+            };
+        }
+
+        function getSchemaPointingToAccounts(): AddonDataScheme {
+            return {
+                Name: "nebulaTestPointToAccountTable" + getShortUUID(),
+                Type: "data",
+                Fields:
+                {
+                    field1: { 
+                        Type: "Resource",
+                        ApplySystemFilter: true,
+                        AddonUUID: CORE_RESOURCES_UUID,
+                        Resource: ACCOUNTS_TABLE
+                    },
+                },
+                SyncData: {
+                    Sync: true
+                }
+            };
+        }
+
+        function getSchemaPointingToUsers(): AddonDataScheme {
+            return {
+                Name: "nebulaTestPointToUserTable" + getShortUUID(),
+                Type: "data",
+                Fields:
+                {
+                    field1: { 
+                        Type: "Resource",
+                        ApplySystemFilter: true,
+                        AddonUUID: CORE_RESOURCES_UUID,
+                        Resource: USERS_TABLE
+                    },
+                },
+                SyncData: {
+                    Sync: true
+                }
+            };
+        }
+
+        it('Preparations - create two pointing tables, one to accounts and one to users table', async () => {
+
+            // Create a table that points to the accounts table.
+            usersSchemaService = await resourceManager.createAdalTable(getSchemaPointingToUsers());
+            accountsSchemaService = await resourceManager.createAdalTable(getSchemaPointingToAccounts());
+
+            // wait for PNS callback to create nodes and edges in graph.
+            await nebulatestService.waitForPNS();
+        });
+
+        it('System filter type "Account", expect to get table pointing to accounts and not users', async () => {
+            // Get schemas that have the account in their path
+            const filter = buildSystemFilter('Account');
+            const getResourcesRequiringSyncParameters = buildGetResourcesRequiringSyncParameters(timeStampBeforeCreation, false, filter);
+            const resourcesRequiringSync = await nebulatestService.getResourcesRequiringSync(getResourcesRequiringSyncParameters);
+
+            // Check we got a valid response
+            expect(resourcesRequiringSync).to.not.be.undefined;
+            expect(resourcesRequiringSync.length).to.be.at.least(1);
+
+            // Check table pointing to accounts is in response
+            const schemaPointingToAccounts = resourcesRequiringSync.find(resource => {
+                return (resource.Resource === accountsSchemaService!.schemaName && resource.AddonUUID === automationAddonUUID);
+            });
+            expect(schemaPointingToAccounts).to.not.be.undefined;
+
+            // Check table pointing to users is not in response
+            const schemaPointingToUsers = resourcesRequiringSync.find(resource => {
+                return (resource.Resource === usersSchemaService!.schemaName && resource.AddonUUID === automationAddonUUID);
+            });
+            expect(schemaPointingToUsers).to.be.undefined;
+        });
+
+        it('System filter type "User", expect to get table pointing to users and not accounts', async () => {
+            // Get schemas that have the account in their path
+            const filter = buildSystemFilter('User');
+            const getResourcesRequiringSyncParameters = buildGetResourcesRequiringSyncParameters(timeStampBeforeCreation, false, filter);
+            const resourcesRequiringSync = await nebulatestService.getResourcesRequiringSync(getResourcesRequiringSyncParameters);
+
+            // Check that expected schema is in response
+            expect(resourcesRequiringSync).to.not.be.undefined;
+            expect(resourcesRequiringSync.length).to.be.at.least(1);
+
+            const schemaPointingToUsers = resourcesRequiringSync.find(resource => {
+                return (resource.Resource === usersSchemaService!.schemaName && resource.AddonUUID === automationAddonUUID);
+            });
+            expect(schemaPointingToUsers).to.not.be.undefined;
+
+            const schemaPointingToAccounts = resourcesRequiringSync.find(resource => {
+                return (resource.Resource === accountsSchemaService!.schemaName && resource.AddonUUID === automationAddonUUID);
+            });
+            expect(schemaPointingToAccounts).to.be.undefined;
+        });
+
+        it('System filter type "None", expect to get both table', async () => {
+            // Get schemas that have the account in their path
+            const filter = buildSystemFilter('None');
+            const getResourcesRequiringSyncParameters = buildGetResourcesRequiringSyncParameters(timeStampBeforeCreation, false, filter);
+            const resourcesRequiringSync = await nebulatestService.getResourcesRequiringSync(getResourcesRequiringSyncParameters);
+
+            // Check that expected schemas are in response
+            expect(resourcesRequiringSync).to.not.be.undefined;
+            expect(resourcesRequiringSync.length).to.be.at.least(2);
+
+            const schemaPointingToUsers = resourcesRequiringSync.find(resource => {
+                return (resource.Resource === usersSchemaService!.schemaName && resource.AddonUUID === automationAddonUUID);
+            });
+            const schemaPointingToAccounts = resourcesRequiringSync.find(resource => {
+                return (resource.Resource === accountsSchemaService!.schemaName && resource.AddonUUID === automationAddonUUID);
+            });
+            expect(schemaPointingToUsers).to.not.be.undefined;
+            expect(schemaPointingToAccounts).to.not.be.undefined;
+        });
+
+        it(`Cleanup Of All Inserted Data and print performance statistics`, async () => {
+            await cleanUp(resourceManager, performanceManager);
+        });
+    });
+
 }
 
 function getShortUUID(): string {
