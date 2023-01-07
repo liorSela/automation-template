@@ -91,21 +91,6 @@ export class NebulaTestService {
         }
     }
 
-    async getRecordsFromNebula(addonUUID: string, resource: string) {
-        const body = {
-            AddonUUID: addonUUID,
-            Name: resource,
-        }
-
-        try {
-            return await this.routerClient.post(this.nebulaGetRecordsRelativeURL, body);
-        }
-        catch (error) {
-            console.error(`Error in getRecordsFromNebula: ${(error as Error).message}`);
-            throw error;
-        }
-    }
-
     /**
      * wait for 30 seconds
      */
