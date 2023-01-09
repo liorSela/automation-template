@@ -10,7 +10,7 @@ import { AddonUUID as testingAddonUUID } from "../../../addon.config.json";
 import { BasicRecord } from "./services/NebulaPNSEmulator.service";
 import jwt from 'jwt-decode';
 import { SystemFilter, GetRecordsRequiringSyncParameters, GetResourcesRequiringSyncParameters, SystemFilterType } from "../entities/nebula/types";
-import { NebulaLocalFunctions } from "./services/NebulaLocalFunctions.service";
+import { NebulaServiceFactory } from "./services/NebulaServiceFactory";
 
 export async function NebulaTest(generalService: GeneralService, addonService: GeneralService, request, tester: TesterFunctions) {
 
@@ -48,9 +48,9 @@ export async function NebulaTest(generalService: GeneralService, addonService: G
             SystemFilter: filter
         };
     }
- 
+
     describe('NebulaTest Suites', () => {
-        const nebulatestService = new NebulaLocalFunctions(generalService, addonService.papiClient, dataObj);
+        const nebulatestService = NebulaServiceFactory.getNebulaService(generalService, addonService.papiClient, dataObj, isLocal);
         const performanceManager: PerformanceManager = new PerformanceManager();
         const resourceManager: ResourceManagerService = new ResourceManagerService(generalService.papiClient, automationAddonUUID);
 
@@ -111,7 +111,7 @@ export async function NebulaTest(generalService: GeneralService, addonService: G
             // get nodes of test_1_table from nebula:
             const getRecordsRequiringSyncParams = buildGetRecordsRequiringSyncParameters(tableName);
             const nodes = await nebulatestService.getRecordsRequiringSync(getRecordsRequiringSyncParams);
-            
+
             console.log(`nodes: ${JSON.stringify(nodes)}`);
 
             // check if nebula has the records (unordered)
@@ -544,7 +544,7 @@ export async function NebulaTest(generalService: GeneralService, addonService: G
 
             // get nodes of test_5_table from nebula:
             let getRecordsRequiringSyncParams = buildGetRecordsRequiringSyncParameters(tableName);
-            const nodes = await nebulatestService.getRecordsRequiringSync(getRecordsRequiringSyncParams);            
+            const nodes = await nebulatestService.getRecordsRequiringSync(getRecordsRequiringSyncParams);
             console.log(`nodes: ${JSON.stringify(nodes)}`);
 
             // check if nebula has the records (unordered)
@@ -562,7 +562,7 @@ export async function NebulaTest(generalService: GeneralService, addonService: G
 
     describe('GetDocumentKeysRequiringSync - users reference fields without system filter (type=None)', async () => {
         // services
-        const nebulatestService = new NebulaLocalFunctions(generalService, addonService.papiClient, dataObj);
+        const nebulatestService = NebulaServiceFactory.getNebulaService(generalService, addonService.papiClient, dataObj, isLocal);
         const performanceManager: PerformanceManager = new PerformanceManager();
         const resourceManager: ResourceManagerService = new ResourceManagerService(generalService.papiClient, automationAddonUUID);
 
@@ -737,7 +737,7 @@ export async function NebulaTest(generalService: GeneralService, addonService: G
 
     describe('GetDocumentKeysRequiringSync - account reference fields without system filter (type=None)', async () => {
         // services
-        const nebulatestService = new NebulaLocalFunctions(generalService, addonService.papiClient, dataObj);
+        const nebulatestService = NebulaServiceFactory.getNebulaService(generalService, addonService.papiClient, dataObj, isLocal);
         const performanceManager: PerformanceManager = new PerformanceManager();
         const resourceManager: ResourceManagerService = new ResourceManagerService(generalService.papiClient, automationAddonUUID);
 
@@ -933,7 +933,7 @@ export async function NebulaTest(generalService: GeneralService, addonService: G
 
     describe('GetDocumentKeysRequiringSync - account reference fields with system filter (type=Account)', async () => {
         // services
-        const nebulatestService = new NebulaLocalFunctions(generalService, addonService.papiClient, dataObj);
+        const nebulatestService = NebulaServiceFactory.getNebulaService(generalService, addonService.papiClient, dataObj, isLocal);
         const performanceManager: PerformanceManager = new PerformanceManager();
         const resourceManager: ResourceManagerService = new ResourceManagerService(generalService.papiClient, automationAddonUUID);
 
@@ -1108,7 +1108,7 @@ export async function NebulaTest(generalService: GeneralService, addonService: G
     });
 
     describe('GetSchemasRequiringSync - system filter', async () => {
-        const nebulatestService = new NebulaLocalFunctions(generalService, addonService.papiClient, dataObj);
+        const nebulatestService = NebulaServiceFactory.getNebulaService(generalService, addonService.papiClient, dataObj, isLocal);
         const performanceManager: PerformanceManager = new PerformanceManager();
         const resourceManager: ResourceManagerService = new ResourceManagerService(generalService.papiClient, automationAddonUUID);
 
