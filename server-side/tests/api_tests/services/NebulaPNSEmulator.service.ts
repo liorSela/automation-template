@@ -67,7 +67,7 @@ export class NebulaPNSEmulator {
         try {
             const body = await this.generatePNSData(data);
             this.papiClient['options']['baseURL'] = "";
-            const results = await this.papiClient.post(fullURL, body, headers);
+            const results = await this.papiClient.post(fullURL, body, { ...headers, 'Content-Type': 'application/json' });
             this.papiClient['options']['baseURL'] = this.originalBaseURL;
             return results;
         }

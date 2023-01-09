@@ -29,7 +29,7 @@ export class NebulaLocalFunctions extends NebulaTestService {
 
     async getAllPNSSubscriptions(): Promise<Subscription[]> {
         try {
-            const results: Subscription[] = await this.addonService.get(`/notification/subscriptions?where=AddonUUID='${this.nebulaAddonUUID}'`);
+            const results: Subscription[] = await this.systemService.papiClient.get(`/notification/subscriptions?where=AddonUUID='${this.nebulaAddonUUID}'`);
             return results;
         }
         catch (ex) {
@@ -55,7 +55,7 @@ export class NebulaLocalFunctions extends NebulaTestService {
 
         const results = await Promise.map(subscriptions,
             async (subscription: Subscription) => {
-                return (await this.addonService.notification.subscriptions.upsert(subscription))
+                return (await this.systemService.papiClient.notification.subscriptions.upsert(subscription))
             },
             { concurrency: PARALLEL_AMOUNT });
 
@@ -117,7 +117,7 @@ export class NebulaLocalFunctions extends NebulaTestService {
                 ModificationDateTime: parameters.ModificationDateTime,
                 IncludeDeleted: parameters.IncludeDeleted,
                 SystemFilter: parameters.SystemFilter
-            })).results;
+            }, { 'Content-Type': 'application/json' })).results;
             this.routerClient['options']['baseURL'] = this.originalBaseURL;
             return results;
 
@@ -132,10 +132,11 @@ export class NebulaLocalFunctions extends NebulaTestService {
     async getRecordsRequiringSync(parameters: GetRecordsRequiringSyncParameters): Promise<GetRecordsRequiringSyncResponse[]> {
         try {
             this.routerClient['options']['baseURL'] = "";
-            const results = (await this.routerClient.post(`${this.nebulaGetRecordsRequiresSyncRelativeURL}?addon_uuid=${parameters.AddonUUID}&resource=${parameters.Resource}`, {
+            const results = await this.routerClient.post(`${this.nebulaGetRecordsRequiresSyncRelativeURL}?addon_uuid=${parameters.AddonUUID}&resource=${parameters.Resource}`, {
                 "ModificationDateTime": parameters.ModificationDateTime,
-                "IncludeDeleted": parameters.IncludeDeleted
-            })).results;
+                "IncludeDeleted": parameters.IncludeDeleted,
+                "SystemFilter": parameters.SystemFilter
+            }, { 'Content-Type': 'application/json' });
             this.routerClient['options']['baseURL'] = this.originalBaseURL;
             return results;
         }
