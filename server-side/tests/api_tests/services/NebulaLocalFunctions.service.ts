@@ -146,24 +146,6 @@ export class NebulaLocalFunctions extends NebulaTestService {
         }
     }
 
-    async getRecordsFromNebula(addonUUID: string, resource: string) {
-        try {
-            const body = {
-                AddonUUID: addonUUID,
-                Name: resource,
-            }
-            this.routerClient['options']['baseURL'] = "";
-            const rawResults = await this.routerClient.post(this.nebulaGetRecordsRelativeURL, body, { 'Content-Type': 'application/json' });
-            this.routerClient['options']['baseURL'] = this.originalBaseURL;
-            return rawResults;
-        }
-        catch (ex) {
-            console.error(`Error in getRecordsFromNebula: ${ex}`);
-            this.routerClient['options']['baseURL'] = this.originalBaseURL;
-            throw new Error((ex as { message: string }).message);
-        }
-    }
-
     // here it's actually wait for Nebula to do its thing, so less time is needed.
     async waitForPNS() {
         const pnsDelaySeconds = 5;

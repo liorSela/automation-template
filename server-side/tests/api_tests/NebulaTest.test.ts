@@ -31,7 +31,7 @@ export async function NebulaTest(generalService: GeneralService, addonService: G
         console.log(JSON.stringify(performanceManager.getStatistics()));
     }
 
-    function buildGetRecordsRequiringSyncParameters(tableName: string, modificationDateTime: string, includeDeleted: boolean = false, filter: SystemFilter | undefined = undefined): GetRecordsRequiringSyncParameters {
+    function buildGetRecordsRequiringSyncParameters(tableName: string, modificationDateTime?: string, includeDeleted: boolean = false, filter: SystemFilter | undefined = undefined): GetRecordsRequiringSyncParameters {
         return {
             AddonUUID: automationAddonUUID,
             Resource: tableName,
@@ -48,7 +48,7 @@ export async function NebulaTest(generalService: GeneralService, addonService: G
             SystemFilter: filter
         };
     }
-
+ 
     describe('NebulaTest Suites', () => {
         const nebulatestService = new NebulaLocalFunctions(generalService, addonService.papiClient, dataObj);
         const performanceManager: PerformanceManager = new PerformanceManager();
@@ -109,13 +109,15 @@ export async function NebulaTest(generalService: GeneralService, addonService: G
             await nebulatestService.waitForPNS();
 
             // get nodes of test_1_table from nebula:
-            const nodes: any = await nebulatestService.getRecordsFromNebula(automationAddonUUID, tableName);
+            const getRecordsRequiringSyncParams = buildGetRecordsRequiringSyncParameters(tableName);
+            const nodes = await nebulatestService.getRecordsRequiringSync(getRecordsRequiringSyncParams);
+            
             console.log(`nodes: ${JSON.stringify(nodes)}`);
 
             // check if nebula has the records (unordered)
-            expect(nodes.length).to.equal(10);
+            expect(nodes.Keys.length).to.equal(10);
             for (let i = 0; i < 10; i++) {
-                expect(nodes.find(node => node.Key === `test_1_item_${i}`)).to.not.equal(undefined);
+                expect(nodes.Keys.find(nodeKey => nodeKey === `test_1_item_${i}`)).to.not.equal(undefined);
             }
             performanceManager.stopMeasure("Test 1");
         });
@@ -160,11 +162,13 @@ export async function NebulaTest(generalService: GeneralService, addonService: G
             await nebulatestService.waitForPNS();
 
             // get nodes of test_2_table from nebula:
-            const nodes_before_sync: any = await nebulatestService.getRecordsFromNebula(automationAddonUUID, tableName);
+            let getRecordsRequiringSyncParams = buildGetRecordsRequiringSyncParameters(tableName);
+            const nodes_before_sync = await nebulatestService.getRecordsRequiringSync(getRecordsRequiringSyncParams);
             console.log(`nodes_before_sync: ${JSON.stringify(nodes_before_sync)}`);
 
             // check that nebula doesn't have the records
-            expect(nodes_before_sync.length).to.equal(0);
+            expect(nodes_before_sync.Keys.length).to.equal(0);
+            expect(nodes_before_sync.HiddenKeys.length).to.equal(0);
 
             // set sync=true
             const newSchema: AddonDataScheme = {
@@ -190,13 +194,14 @@ export async function NebulaTest(generalService: GeneralService, addonService: G
             await nebulatestService.initPNS();
 
             // get nodes of test_2_table from nebula:
-            const nodes_after_sync: any = await nebulatestService.getRecordsFromNebula(automationAddonUUID, tableName);
+            getRecordsRequiringSyncParams = buildGetRecordsRequiringSyncParameters(tableName);
+            const nodes_after_sync = await nebulatestService.getRecordsRequiringSync(getRecordsRequiringSyncParams);
             console.log(`nodes_after_sync: ${JSON.stringify(nodes_after_sync)}`);
 
             // check if nebula has the records (unordered)
-            expect(nodes_after_sync.length).to.equal(10);
+            expect(nodes_after_sync.Keys.length).to.equal(10);
             for (let i = 0; i < 10; i++) {
-                expect(nodes_after_sync.find(node => node.Key === `test_2_item_${i}`)).to.not.equal(undefined);
+                expect(nodes_after_sync.Keys.find(nodeKey => nodeKey === `test_2_item_${i}`)).to.not.equal(undefined);
             }
             performanceManager.stopMeasure("Test 2");
         });
@@ -248,13 +253,14 @@ export async function NebulaTest(generalService: GeneralService, addonService: G
             await nebulatestService.waitForPNS();
 
             // get nodes of test_7_table from nebula:
-            const nodes_before_sync: any = await nebulatestService.getRecordsFromNebula(automationAddonUUID, tableName);
+            let getRecordsRequiringSyncParams = buildGetRecordsRequiringSyncParameters(tableName);
+            const nodes_before_sync = await nebulatestService.getRecordsRequiringSync(getRecordsRequiringSyncParams);
             console.log(`nodes_before_sync: ${JSON.stringify(nodes_before_sync)}`);
 
             // check that nebula has the records
-            expect(nodes_before_sync.length).to.equal(10);
+            expect(nodes_before_sync.Keys.length).to.equal(10);
             for (let i = 0; i < 10; i++) {
-                expect(nodes_before_sync.find(node => node.Key === `test_7_item_${i}`)).to.not.equal(undefined);
+                expect(nodes_before_sync.Keys.find(nodeKey => nodeKey === `test_7_item_${i}`)).to.not.equal(undefined);
             }
 
             // set sync=false
@@ -281,11 +287,12 @@ export async function NebulaTest(generalService: GeneralService, addonService: G
             await nebulatestService.initPNS();
 
             // get nodes of test_7_table from nebula:
-            const nodes_after_sync: any = await nebulatestService.getRecordsFromNebula(automationAddonUUID, tableName);
+            getRecordsRequiringSyncParams = buildGetRecordsRequiringSyncParameters(tableName);
+            const nodes_after_sync = await nebulatestService.getRecordsRequiringSync(getRecordsRequiringSyncParams);
             console.log(`nodes_after_sync: ${JSON.stringify(nodes_after_sync)}`);
 
             // check if nebula doesn't have the records
-            expect(nodes_after_sync.length).to.equal(0);
+            expect(nodes_after_sync.Keys.length).to.equal(0);
             performanceManager.stopMeasure("Test 7");
         });
 
@@ -536,13 +543,14 @@ export async function NebulaTest(generalService: GeneralService, addonService: G
             await nebulatestService.waitForPNS();
 
             // get nodes of test_5_table from nebula:
-            const nodes: any = await nebulatestService.getRecordsFromNebula(automationAddonUUID, tableName);
+            let getRecordsRequiringSyncParams = buildGetRecordsRequiringSyncParameters(tableName);
+            const nodes = await nebulatestService.getRecordsRequiringSync(getRecordsRequiringSyncParams);            
             console.log(`nodes: ${JSON.stringify(nodes)}`);
 
             // check if nebula has the records (unordered)
-            expect(nodes.length).to.equal(10);
+            expect(nodes.Keys.length).to.equal(10);
             for (let i = 0; i < 10; i++) {
-                expect(nodes.find(node => node.Key === `test_5_item_${i}`)).to.not.equal(undefined);
+                expect(nodes.Keys.find(nodeKey => nodeKey === `test_5_item_${i}`)).to.not.equal(undefined);
             }
             performanceManager.stopMeasure("Test 5");
         });
