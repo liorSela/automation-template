@@ -15,16 +15,22 @@ export async function DataIndexWhereClause(generalService: GeneralService, addon
 
     describe('Index Tests:', async () => {
         let connector = service.indexType("regular");
-        testerFunc(it, expect, connector);
+        baseTester(it, expect, connector);
     });
 
     describe('Shared-Index Tests:', async () => {
         let connector = service.indexType("shared");
-        testerFunc(it, expect, connector);
+        baseTester(it, expect, connector);
+    });
+
+    describe('Abstract Index Tests:', async () => {
+        let connector1 = service.indexType("inherit1");
+        let connector2 = service.indexType("inherit2");
+        abstractTester(it, expect, connector1, connector2, generalService);
     });
 }
 
-function testerFunc(it: any, expect, connector: Connector) {
+function baseTester(it: any, expect, connector: Connector) {
     it(`Index Creation`, async () => {
         await connector.upsertSchema({
             "Fields": {
@@ -249,5 +255,166 @@ function testerFunc(it: any, expect, connector: Connector) {
 
     it(`Index Purge`, async () => {
         await connector.purgeSchema();
+    });
+}
+
+function abstractTester(it: any, expect: Chai.ExpectStatic, connector1: Connector, connector2: Connector, generalService: GeneralService) {
+    it(`First Schema Creation`, async () => {
+        await connector1.upsertSchema({
+            "Fields": {
+                "string_field": {
+                    "Type": "String",
+                    "Indexed": true
+                },
+                "bool_field": {
+                    "Type": "Bool",
+                    "Indexed": true
+                },
+                "int_field": {
+                    "Type": "Integer",
+                    "Indexed": true
+                },
+                "double_field": {
+                    "Type": "Double",
+                    "Indexed": true
+                },
+                "date_field": {
+                    "Type": "DateTime",
+                    "Indexed": true
+                },
+                "unindexed_field": {
+                    "Type": "String",
+                    "Indexed": false
+                }
+            }
+        });
+    });
+
+    it(`Second Schema Creation`, async () => {
+        await connector2.upsertSchema({
+            "Fields": {
+                "string_field": {
+                    "Type": "String",
+                    "Indexed": true
+                },
+                "bool_field": {
+                    "Type": "Bool",
+                    "Indexed": true
+                },
+                "int_field": {
+                    "Type": "Integer",
+                    "Indexed": true
+                },
+                "double_field": {
+                    "Type": "Double",
+                    "Indexed": true
+                },
+                "date_field": {
+                    "Type": "DateTime",
+                    "Indexed": true
+                },
+                "unindexed_field": {
+                    "Type": "String",
+                    "Indexed": false
+                }
+            }
+        });
+    });
+
+    it(`Create Documents`, async () => {
+        await connector1.batchUpsertDocuments([
+            {
+                Key: "1",
+                string_field: "Susann Renato",
+                bool_field: true,
+                int_field: 6,
+                double_field: 9.5,
+                date_field: "2022-11-24T12:43:32.166Z",
+                unindexed_field: "shouldn't be indexed",
+                ElasticSearchSuperTypes: ["abstarcSchemaName"]
+            },
+            {
+                Key: "2",
+                string_field: "Jessika Renato",
+                bool_field: false,
+                int_field: 4,
+                double_field: 6.2,
+                date_field: "2022-11-24T12:45:32.166Z",
+                unindexed_field: "shouldn't be indexed",
+                ElasticSearchSuperTypes: ["abstarcSchemaName"]
+            },
+            {
+                Key: "3",
+                string_field: "Jessika Silvano",
+                bool_field: true,
+                int_field: 2,
+                double_field: 1.5,
+                date_field: "2022-11-24T12:47:32.166Z",
+                unindexed_field: "shouldn't be indexed",
+                ElasticSearchSuperTypes: ["abstarcSchemaName"]
+            }
+        ]);
+        await connector2.batchUpsertDocuments([
+            {
+                Key: "4",
+                string_field: "Shani Silvano",
+                bool_field: false,
+                int_field: 1,
+                double_field: 2.3,
+                date_field: "2022-11-24T12:46:32.166Z",
+                unindexed_field: "shouldn't be indexed",
+                ElasticSearchSuperTypes: ["abstarcSchemaName"]
+            },
+            {
+                Key: "5",
+                string_field: "Susann Kimbell",
+                bool_field: true,
+                int_field: 3,
+                double_field: 8.4,
+                date_field: "2022-11-24T12:44:32.166Z",
+                unindexed_field: "shouldn't be indexed",
+                ElasticSearchSuperTypes: ["abstarcSchemaName"]
+            },
+            {
+                Key: "6",
+                string_field: "Shani Kimbell",
+                bool_field: false,
+                int_field: 5,
+                double_field: 10.0,
+                date_field: "2022-11-24T12:42:32.166Z",
+                unindexed_field: "shouldn't be indexed",
+                ElasticSearchSuperTypes: ["abstarcSchemaName"]
+            }
+        ]);
+        generalService.sleep(10000);
+    });
+
+    // DI-21565 + Tests bug DI-22195
+    it("Get all documents from both schemas", async () => {
+        let diResponse = await connector1.getDocumentsFromAbstract({});
+        expect(diResponse, "Response array").to.be.an('array').with.lengthOf(6);
+    })
+
+    // DI-21886
+    it("Get all documents with ElasticSearchType", async () => {
+        let diResponse = await connector1.getDocumentsFromAbstract({
+            fields: ["Key", "ElasticSearchType"],
+            order_by: "Key"
+        });
+        expect(diResponse, "Response array").to.be.an('array').with.lengthOf(6);
+        expect(diResponse[0], "First result").to.have.a.property("ElasticSearchType");
+    })
+
+    // Tests bug DI-22087
+    it("Get all documents of sub schema (with OR statement)", async () => {
+        let diResponse = await connector1.getDocuments({
+            where: "bool_field=true OR bool_field=false"
+        });
+        expect(diResponse, "Response array").to.be.an('array').with.lengthOf(3);
+    })
+
+    it(`Schemas Purge`, async () => {
+        await connector1.purgeSchema();
+        await connector2.purgeSchema();
     });
 }

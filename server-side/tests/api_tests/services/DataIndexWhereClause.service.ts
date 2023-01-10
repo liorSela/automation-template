@@ -17,6 +17,7 @@ export interface Connector {
     batchUpsertDocuments(documents: any[]): any;
     purgeSchema: () => any;
     getDocuments: (params: FindOptions) => Promise<ElasticSearchDocument[]>;
+    getDocumentsFromAbstract: (params: FindOptions) => Promise<ElasticSearchDocument[]>;
 }
 
 export class DataIndexWhereClauseService {
@@ -27,6 +28,8 @@ export class DataIndexWhereClauseService {
     addonUUID: string;
     indexSchema: AddonDataScheme;
     sharedIndexSchema: AddonDataScheme;
+    inheritingSchema1: AddonDataScheme;
+    inheritingSchema2: AddonDataScheme;
     sharedIndexName: string;
 
     constructor(public systemService: GeneralService, public addonService: PapiClient, dataObject: any) {
@@ -49,16 +52,36 @@ export class DataIndexWhereClauseService {
             }
         }
         console.log("Shared index schema will be called: " + this.sharedIndexSchema.Name);
+        this.inheritingSchema1 = {
+            Name: "integration-test-schema-of-inheriting-schema-1-" + uuid(),
+            Type: "shared_index",
+            DataSourceData: {
+                IndexName: this.sharedIndexName
+            }
+        }
+        this.inheritingSchema2 = {
+            Name: "integration-test-schema-of-inheriting-schema-2-" + uuid(),
+            Type: "shared_index",
+            DataSourceData: {
+                IndexName: this.sharedIndexName
+            }
+        }
     }
 
-    indexType = (type: "regular" | "shared"): Connector => {
+    indexType = (type: "regular" | "shared" | "inherit1" | "inherit2"): Connector => {
         let baseSchema: AddonDataScheme
         let api: any;
         if (type === "regular") {
             baseSchema = this.indexSchema;
             api = this.papiClient.addons.index;
-        } else {
+        } else if (type === "shared") {
             baseSchema = this.sharedIndexSchema;
+            api = this.papiClient.addons.shared_index.index.index_name(this.sharedIndexName);
+        } else if (type === "inherit1") {
+            baseSchema = this.inheritingSchema1;
+            api = this.papiClient.addons.shared_index.index.index_name(this.sharedIndexName);
+        } else if (type === "inherit2") {
+            baseSchema = this.inheritingSchema2;
             api = this.papiClient.addons.shared_index.index.index_name(this.sharedIndexName);
         }
         return {
@@ -82,6 +105,12 @@ export class DataIndexWhereClauseService {
                 return api
                     .uuid(this.addonUUID)
                     .resource(baseSchema.Name)
+                    .find(params);
+            },
+            getDocumentsFromAbstract: (params: FindOptions): Promise<ElasticSearchDocument[]> => {
+                return api
+                    .uuid(this.addonUUID)
+                    .resource("abstarcSchemaName")
                     .find(params);
             },
             purgeSchema: () => {
