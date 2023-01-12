@@ -1,4 +1,4 @@
-import { DataIndexWhereClause } from '../../server-side/tests/api_tests/DataIndexWhereClause.test';
+import { DataIndex } from '../tests/api_tests/DataIndex.test';
 
 import { SchemaExtensions } from '../tests/api_tests/SchemaExtensions.test';
 import GeneralService, { TesterFunctions } from '../potentialQA_SDK/server_side/general.service';
@@ -122,7 +122,7 @@ export async function data_index_where_clause(client: Client, addonClient: Clien
     testName = 'DataIndexWhereClause'; //printing your test name - done for logging
     service.PrintMemoryUseToLog('Start', testName);
     testerFunctions = service.initiateTesterFunctions(client, testName);
-    await DataIndexWhereClause(service, serviceAddon, request, testerFunctions);//this is the call to YOUR test function
+    await DataIndex(service, serviceAddon, request, testerFunctions);//this is the call to YOUR test function
     await test_data(client, testerFunctions);//this is done to print versions at the end of test - can be deleted
     return (await testerFunctions.run());
 };
