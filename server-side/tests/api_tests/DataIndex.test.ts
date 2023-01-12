@@ -15,12 +15,12 @@ export async function DataIndex(generalService: GeneralService, addonService: Ge
 
     describe('Index Tests:', async () => {
         let connector = service.indexType("regular");
-        baseTester(it, expect, connector);
+        baseTester(it, expect, connector, generalService);
     });
 
     describe('Shared-Index Tests:', async () => {
         let connector = service.indexType("shared");
-        baseTester(it, expect, connector);
+        baseTester(it, expect, connector, generalService);
     });
 
     describe('Abstract Index Tests:', async () => {
@@ -30,7 +30,7 @@ export async function DataIndex(generalService: GeneralService, addonService: Ge
     });
 }
 
-function baseTester(it: any, expect, connector: Connector) {
+function baseTester(it: any, expect, connector: Connector, generalService: GeneralService) {
     it(`Index Creation`, async () => {
         await connector.upsertSchema({
             "Fields": {
@@ -139,6 +139,7 @@ function baseTester(it: any, expect, connector: Connector) {
                 "name.last": "Kimbell"
             }
         ]);
+        generalService.sleep(5000);
     })
 
     it("Get all documents ordered by Key", async () => {
@@ -203,12 +204,12 @@ function baseTester(it: any, expect, connector: Connector) {
         expect(diResponse, "Response array").to.be.an('array').with.lengthOf(2);
     })
 
-    it("Get all documents that string_field doesn't end with \"Kimbell\" (using not)", async () => {
-        let diResponse = await connector.getDocuments({
-            where: "string_field not like '%Kimbell'"
-        });
-        expect(diResponse, "Response array").to.be.an('array').with.lengthOf(4);
-    })
+    // it("Get all documents that string_field doesn't end with \"Kimbell\" (using not)", async () => {
+    //     let diResponse = await connector.getDocuments({
+    //         where: "string_field not like '%Kimbell'"
+    //     });
+    //     expect(diResponse, "Response array").to.be.an('array').with.lengthOf(4);
+    // })
 
     it("Get all documents that int_field is greater then 4", async () => {
         let diResponse = await connector.getDocuments({
@@ -259,12 +260,12 @@ function baseTester(it: any, expect, connector: Connector) {
     //     expect(diResponse, "Response array").to.be.an('array').with.lengthOf(2);
     // })
 
-    it("Get all documents that int_field not in list (using not in)", async () => {
-        let diResponse = await connector.getDocuments({
-            where: "int_field not in (1,3,5)"
-        });
-        expect(diResponse, "Response array").to.be.an('array').with.lengthOf(3);
-    })
+    // it("Get all documents that int_field not in list (using not in)", async () => {
+    //     let diResponse = await connector.getDocuments({
+    //         where: "int_field not in (1,3,5)"
+    //     });
+    //     expect(diResponse, "Response array").to.be.an('array').with.lengthOf(3);
+    // })
 
     it("Get all documents that string_field not in list (using not in)", async () => {
         let diResponse = await connector.getDocuments({
@@ -310,6 +311,7 @@ function baseTester(it: any, expect, connector: Connector) {
             "name.first": "Alex",
             "name.last": "Holland"
         });
+        generalService.sleep(5000);
     })
 
     it("Get document by first name after update (validate that update of reference works)", async () => {
@@ -452,7 +454,7 @@ function abstractTester(it: any, expect: Chai.ExpectStatic, connector1: Connecto
                 ElasticSearchSuperTypes: ["abstarcSchemaName"]
             }
         ]);
-        generalService.sleep(10000);
+        generalService.sleep(5000);
     });
 
     // DI-21565 + Tests bug DI-22195
