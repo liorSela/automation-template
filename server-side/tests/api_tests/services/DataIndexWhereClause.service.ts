@@ -17,6 +17,8 @@ export interface Connector {
     batchUpsertDocuments(documents: any[]): any;
     purgeSchema: () => any;
     getDocuments: (params: FindOptions) => Promise<ElasticSearchDocument[]>;
+    postDocument(arg0: {}): unknown;
+    searchByDSL: (dslQuery: any) => Promise<ElasticSearchDocument[]>;
     getDocumentsFromAbstract: (params: FindOptions) => Promise<ElasticSearchDocument[]>;
 }
 
@@ -106,6 +108,18 @@ export class DataIndexWhereClauseService {
                     .uuid(this.addonUUID)
                     .resource(baseSchema.Name)
                     .find(params);
+            },
+            postDocument: (body: ElasticSearchDocument): Promise<ElasticSearchDocument[]> => {
+                return api
+                    .uuid(this.addonUUID)
+                    .resource(baseSchema.Name)
+                    .create(body);
+            },
+            searchByDSL: (dslQuery: any): Promise<any> => {
+                return api
+                    .search(dslQuery)
+                    .uuid(this.addonUUID)
+                    .resource(baseSchema.Name);
             },
             getDocumentsFromAbstract: (params: FindOptions): Promise<ElasticSearchDocument[]> => {
                 return api

@@ -57,6 +57,14 @@ function baseTester(it: any, expect, connector: Connector) {
                 "unindexed_field": {
                     "Type": "String",
                     "Indexed": false
+                },
+                "name.first": {
+                    "Type": "String",
+                    "Indexed": true
+                },
+                "name.last": {
+                    "Type": "String",
+                    "Indexed": true
                 }
             }
         });
@@ -71,7 +79,9 @@ function baseTester(it: any, expect, connector: Connector) {
                 int_field: 6,
                 double_field: 9.5,
                 date_field: "2022-11-24T12:43:32.166Z",
-                unindexed_field: "shouldn't be indexed"
+                unindexed_field: "shouldn't be indexed",
+                "name.first": "Susann",
+                "name.last": "Renato"
             },
             {
                 Key: "2",
@@ -80,7 +90,9 @@ function baseTester(it: any, expect, connector: Connector) {
                 int_field: 4,
                 double_field: 6.2,
                 date_field: "2022-11-24T12:45:32.166Z",
-                unindexed_field: "shouldn't be indexed"
+                unindexed_field: "shouldn't be indexed",
+                "name.first": "Jessika",
+                "name.last": "Renato"
             },
             {
                 Key: "3",
@@ -89,7 +101,9 @@ function baseTester(it: any, expect, connector: Connector) {
                 int_field: 2,
                 double_field: 1.5,
                 date_field: "2022-11-24T12:47:32.166Z",
-                unindexed_field: "shouldn't be indexed"
+                unindexed_field: "shouldn't be indexed",
+                "name.first": "Jessika",
+                "name.last": "Silvano"
             },
             {
                 Key: "4",
@@ -98,7 +112,9 @@ function baseTester(it: any, expect, connector: Connector) {
                 int_field: 1,
                 double_field: 2.3,
                 date_field: "2022-11-24T12:46:32.166Z",
-                unindexed_field: "shouldn't be indexed"
+                unindexed_field: "shouldn't be indexed",
+                "name.first": "Shani",
+                "name.last": "Silvano"
             },
             {
                 Key: "5",
@@ -107,7 +123,9 @@ function baseTester(it: any, expect, connector: Connector) {
                 int_field: 3,
                 double_field: 8.4,
                 date_field: "2022-11-24T12:44:32.166Z",
-                unindexed_field: "shouldn't be indexed"
+                unindexed_field: "shouldn't be indexed",
+                "name.first": "Susann",
+                "name.last": "Kimbell"
             },
             {
                 Key: "6",
@@ -116,7 +134,9 @@ function baseTester(it: any, expect, connector: Connector) {
                 int_field: 5,
                 double_field: 10.0,
                 date_field: "2022-11-24T12:42:32.166Z",
-                unindexed_field: "shouldn't be indexed"
+                unindexed_field: "shouldn't be indexed",
+                "name.first": "Shani",
+                "name.last": "Kimbell"
             }
         ]);
     })
@@ -251,6 +271,52 @@ function baseTester(it: any, expect, connector: Connector) {
             where: "string_field not in ('Susann Renato', 'Jessika Silvano')"
         });
         expect(diResponse, "Response array").to.be.an('array').with.lengthOf(4);
+    })
+
+    // Tests bug DI-22388
+    it("Get all documents that name.first is Shani", async () => {
+        let diResponse = await connector.getDocuments({
+            where: "name.first='Shani'"
+        });
+        expect(diResponse, "Response array").to.be.an('array').with.lengthOf(2);
+    })
+
+    // DI-21958
+    it("Validate that strings are mapped as keywords (by doing aggregations on them)", async () => {
+        let diResponse = await connector.searchByDSL({
+            "aggs": {
+                "my-agg-name": {
+                    "terms": {
+                        "field": "name.first"
+                    }
+                }
+            }
+        });
+        expect(diResponse, "Raw response").to.have.property("aggregations");
+        expect(diResponse["aggregations"], "Response aggregations").to.have.property("my-agg-name");
+        expect(diResponse["aggregations"]["my-agg-name"], "Response specific aggregation").to.have.property("buckets");
+        expect(diResponse["aggregations"]["my-agg-name"]["buckets"], "Response buckets").to.be.an('array').with.lengthOf(3);
+    })
+
+    it("Update a document", async () => {
+        await connector.postDocument({
+            Key: "6",
+            string_field: "Alex Holland",
+            bool_field: true,
+            int_field: 15,
+            double_field: 59.7,
+            date_field: "2022-12-24T12:42:32.166Z",
+            unindexed_field: "shouldn't be indexed",
+            "name.first": "Alex",
+            "name.last": "Holland"
+        });
+    })
+
+    it("Get document by first name after update (validate that update of reference works)", async () => {
+        let diResponse = await connector.getDocuments({
+            where: "name.first='Alex'"
+        });
+        expect(diResponse, "Response array").to.be.an('array').with.lengthOf(1);
     })
 
     it(`Index Purge`, async () => {
