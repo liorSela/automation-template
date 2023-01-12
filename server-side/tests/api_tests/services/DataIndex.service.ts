@@ -22,7 +22,7 @@ export interface Connector {
     getDocumentsFromAbstract: (params: FindOptions) => Promise<ElasticSearchDocument[]>;
 }
 
-export class DataIndexWhereClauseService {
+export class DataIndexService {
     papiClient: PapiClient;
     routerClient: PapiClient;
     generalService: GeneralService;
