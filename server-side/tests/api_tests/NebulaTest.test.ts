@@ -1,5 +1,5 @@
 //00000000-0000-0000-0000-000000006a91
-import { NebulaTestService } from "./services/nebulatest.service";
+import { unitTestsResult } from "./services/nebulatest.service";
 import GeneralService, { TesterFunctions } from "../../potentialQA_SDK/server_side/general.service";
 import { PerformanceManager } from "./services/performance_management/performance_manager";
 import { ResourceManagerService } from "./services/resource_management/resource_manager.service";
@@ -48,6 +48,20 @@ export async function NebulaTest(generalService: GeneralService, addonService: G
             SystemFilter: filter
         };
     }
+
+    describe('Nebula unit tests', () => {
+        const nebulaTestService = NebulaServiceFactory.getNebulaService(generalService, addonService.papiClient, dataObj, isLocal);
+        const performanceManager: PerformanceManager = new PerformanceManager();
+
+        it(`run the Nebula unit tests endpoint and make sure everything passed`, async () => {
+            performanceManager.startMeasure(`Test 1`, `run the Nebula unit tests endpoint and make sure everything passed`);
+            const results: unitTestsResult = await nebulaTestService.runUnitTests();
+            expect(results.stats.failures).to.equal(0,
+                `The following unit tests failed: ${JSON.stringify(results.tests.filter(test => test.failed === true))}`);
+            performanceManager.stopMeasure(`Test 1`);
+        })
+
+    })
 
     describe('NebulaTest Suites', () => {
         const nebulatestService = NebulaServiceFactory.getNebulaService(generalService, addonService.papiClient, dataObj, isLocal);
