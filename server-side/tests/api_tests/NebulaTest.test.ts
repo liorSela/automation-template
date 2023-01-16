@@ -465,7 +465,7 @@ export async function NebulaTest(generalService: GeneralService, addonService: G
             console.log(`resourcesRequiringSyncX: ${JSON.stringify(resourcesRequiringSyncX)}`);
 
             // check that the resource is not in the list
-            expect(resourcesRequiringSyncX.find(resource => resource.Resource === tableName)).to.not.equal(undefined);
+            expect(resourcesRequiringSyncX.find(resource => resource.Resource === tableName)).to.equal(undefined);
 
             // get records requiring sync using X
             let getRecordsRequiringSyncParams = buildGetRecordsRequiringSyncParameters(tableName, currentTimeX);
@@ -1107,6 +1107,7 @@ export async function NebulaTest(generalService: GeneralService, addonService: G
         });
     });
 
+    //todo: add tests for schemas without documents (should not return from GetSchemasRequiringSync).
     describe('GetSchemasRequiringSync - system filter', async () => {
         const nebulatestService = NebulaServiceFactory.getNebulaService(generalService, addonService.papiClient, dataObj, isLocal);
         const performanceManager: PerformanceManager = new PerformanceManager();
@@ -1124,6 +1125,17 @@ export async function NebulaTest(generalService: GeneralService, addonService: G
             return {
                 Type: type
             };
+        }
+
+        async function getAnAccountUUID(): Promise<string> {
+            const accounts = await generalService.papiClient.accounts.find();
+            const validAccount = accounts.find(account => account.UUID !== undefined);
+
+            if (validAccount === undefined) {
+                throw new Error('Distributor does not have an account with a UUID, create an account and try again.');
+            }
+
+            return validAccount.UUID!;
         }
 
         function getSchemaPointingToAccounts(): AddonDataScheme {
@@ -1164,18 +1176,43 @@ export async function NebulaTest(generalService: GeneralService, addonService: G
             };
         }
 
-        it('Preparations - create two pointing tables, one to accounts and one to users table', async () => {
-
-            // Create a table that points to the accounts table.
-            usersSchemaService = await resourceManager.createAdalTable(getSchemaPointingToUsers());
+        it('Preparations - create a table pointing to accounts.', async () => {
             accountsSchemaService = await resourceManager.createAdalTable(getSchemaPointingToAccounts());
-
-            await nebulatestService.pnsInsertSchema(testingAddonUUID, usersSchemaService!.schemaName!);
-            await nebulatestService.waitForPNS();
             await nebulatestService.pnsInsertSchema(testingAddonUUID, accountsSchemaService!.schemaName!);
-            await nebulatestService.waitForPNS();
+            console.debug(`Accounts Schema: ${accountsSchemaService?.schemaName}`);
+        });
 
-            await nebulatestService.initPNS();
+        it('Preparations - create a table pointing to users.', async () => {
+            usersSchemaService = await resourceManager.createAdalTable(getSchemaPointingToUsers());
+            await nebulatestService.pnsInsertSchema(testingAddonUUID, usersSchemaService!.schemaName!);
+            console.debug(`Users Schema: ${usersSchemaService?.schemaName}`);
+        });
+
+        it('Preparations - wait for PNS after table creation.', async () => {
+            await nebulatestService.waitForPNS();
+        });
+
+        it('Preparations - upsert documents into table pointing to accounts.', async () => {
+            const accountUUID = await getAnAccountUUID();
+            const accountDocuments: AddonData[] = [{
+                Key: '1',
+                field1: accountUUID
+            }];
+            await accountsSchemaService!.upsertBatch(accountDocuments);
+            await nebulatestService.pnsInsertRecords(testingAddonUUID, accountsSchemaService!.schemaName!, (accountDocuments as BasicRecord[]));
+        });
+
+        it('Preparations - upsert documents into table pointing to users.', async () => {
+            const userDocuments: AddonData[] = [{
+                Key: '1',
+                field1: getCurrentUserUUID(addonService.papiClient)
+            }];
+            await usersSchemaService!.upsertBatch(userDocuments);
+            await nebulatestService.pnsInsertRecords(testingAddonUUID, usersSchemaService!.schemaName!, (userDocuments as BasicRecord[]));
+        });
+
+        it('Preparations - wait for PNS after documents upsertion.', async () => {
+            await nebulatestService.waitForPNS();
         });
 
         it('System filter type "Account", expect to get table pointing to accounts and not users', async () => {
