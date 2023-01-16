@@ -58,6 +58,10 @@ function baseTester(it: any, expect, connector: Connector, generalService: Gener
                     "Type": "String",
                     "Indexed": false
                 },
+                "name.key": {
+                    "Type": "String",
+                    "Indexed": true
+                },
                 "name.first": {
                     "Type": "String",
                     "Indexed": true
@@ -80,6 +84,7 @@ function baseTester(it: any, expect, connector: Connector, generalService: Gener
                 double_field: 9.5,
                 date_field: "2022-11-24T12:43:32.166Z",
                 unindexed_field: "shouldn't be indexed",
+                "name.key": "10",
                 "name.first": "Susann",
                 "name.last": "Renato"
             },
@@ -91,6 +96,7 @@ function baseTester(it: any, expect, connector: Connector, generalService: Gener
                 double_field: 6.2,
                 date_field: "2022-11-24T12:45:32.166Z",
                 unindexed_field: "shouldn't be indexed",
+                "name.key": "20",
                 "name.first": "Jessika",
                 "name.last": "Renato"
             },
@@ -102,6 +108,7 @@ function baseTester(it: any, expect, connector: Connector, generalService: Gener
                 double_field: 1.5,
                 date_field: "2022-11-24T12:47:32.166Z",
                 unindexed_field: "shouldn't be indexed",
+                "name.key": "30",
                 "name.first": "Jessika",
                 "name.last": "Silvano"
             },
@@ -113,6 +120,7 @@ function baseTester(it: any, expect, connector: Connector, generalService: Gener
                 double_field: 2.3,
                 date_field: "2022-11-24T12:46:32.166Z",
                 unindexed_field: "shouldn't be indexed",
+                "name.key": "40",
                 "name.first": "Shani",
                 "name.last": "Silvano"
             },
@@ -124,6 +132,7 @@ function baseTester(it: any, expect, connector: Connector, generalService: Gener
                 double_field: 8.4,
                 date_field: "2022-11-24T12:44:32.166Z",
                 unindexed_field: "shouldn't be indexed",
+                "name.key": "50",
                 "name.first": "Susann",
                 "name.last": "Kimbell"
             },
@@ -135,6 +144,7 @@ function baseTester(it: any, expect, connector: Connector, generalService: Gener
                 double_field: 10.0,
                 date_field: "2022-11-24T12:42:32.166Z",
                 unindexed_field: "shouldn't be indexed",
+                "name.key": "60",
                 "name.first": "Shani",
                 "name.last": "Kimbell"
             }
@@ -297,6 +307,14 @@ function baseTester(it: any, expect, connector: Connector, generalService: Gener
         expect(diResponse["aggregations"], "Response aggregations").to.have.property("my-agg-name");
         expect(diResponse["aggregations"]["my-agg-name"], "Response specific aggregation").to.have.property("buckets");
         expect(diResponse["aggregations"]["my-agg-name"]["buckets"], "Response buckets").to.be.an('array').with.lengthOf(3);
+    })
+
+    // Tests bug DI-22498
+    it("Get document by reference field (name='10')", async () => {
+        let diResponse = await connector.getDocuments({
+            where: "name='10'"
+        });
+        expect(diResponse, "Response array").to.be.an('array').with.lengthOf(1);
     })
 
     it("Update a document", async () => {
