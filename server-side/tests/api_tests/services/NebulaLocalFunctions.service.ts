@@ -1,6 +1,6 @@
 import { PapiClient, Subscription } from "@pepperi-addons/papi-sdk";
 import GeneralService from "../../../potentialQA_SDK/server_side/general.service";
-import { NebulaTestService } from "./nebulatest.service";
+import { NebulaTestService, unitTestsResult } from "./nebulatest.service";
 import { Promise } from "bluebird";
 import { BasicRecord, NebulaPNSEmulator, PNSPostBody } from "./NebulaPNSEmulator.service";
 import { AddonUUID as testingAddonUUID } from "../../../../addon.config.json";
@@ -20,12 +20,29 @@ export class NebulaLocalFunctions extends NebulaTestService {
     nebulaGetRecordsRelativeURL = `${this.nebulaLocalRelativeURL}/inner_endpoints/get_records_of_schema_from_nebula`;
     nebulaSchemesChangesRelativeURL = `${this.nebulaLocalRelativeURL}/pns_endpoints/schemes_changes`;
     nebulaRecordChangesRelativeURL = `${this.nebulaLocalRelativeURL}/pns_endpoints/record_changes`;
+    nebulaUnitTests = `${this.nebulaLocalRelativeURL}/tests/neptune_graph_service`
 
     constructor(public systemService: GeneralService, public addonService: PapiClient, dataObject: any) {
         super(systemService, addonService, dataObject);
         this.pnsEmulator = new NebulaPNSEmulator(addonService);
         this.originalBaseURL = this.addonService['options']['baseURL'];
     }
+
+    async runUnitTests(): Promise<unitTestsResult> {
+        try {
+            this.routerClient['options']['baseURL'] = "";
+            const result = await this.addonService.post(this.nebulaUnitTests, {});
+            this.routerClient['options']['baseURL'] = this.originalBaseURL;
+            return result;
+
+        }
+        catch (ex) {
+            console.error(`Error in runUnitTests: ${ex}`);
+            this.routerClient['options']['baseURL'] = this.originalBaseURL;
+            throw new Error((ex as { message: string }).message);
+        }
+    }
+
 
     async getAllPNSSubscriptions(): Promise<Subscription[]> {
         try {

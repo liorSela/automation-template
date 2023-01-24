@@ -10,6 +10,28 @@ export interface GetRecordsRequiringSyncResponse {
     HiddenKeys: string[]
 };
 
+export interface unitTestsResult {
+    "stats": {
+        "suites": number,
+        "tests": number,
+        "passes": number,
+        "pending": number,
+        "failures": number,
+        "start": string
+        "end": string
+        "duration": number
+    },
+    "tests":
+    {
+        "title": string
+        "duration": number
+        "failed": boolean,
+        "passed": boolean,
+        "suite": string,
+        "superSuite": string
+    }[]
+}
+
 export class NebulaTestService {
     pnsInsertRecords(testingAddonUUID: string, tableName: string, test_7_items: import("./NebulaPNSEmulator.service").BasicRecord[]) {
         return
@@ -31,6 +53,49 @@ export class NebulaTestService {
     initPNS() {
         return
     }
+
+    async pollExecution(papiClient: PapiClient, ExecutionUUID: string, interval = 1000, maxAttempts = 60, validate = (res) => {
+        return res != null && (res.Status.Name === 'Failure' || res.Status.Name === 'Success');
+    }) {
+        let attempts = 0;
+
+        const executePoll = async (resolve, reject) => {
+            console.log(`Polling execution ${ExecutionUUID} attempt ${attempts}`);
+            const result = await papiClient.get(`/audit_logs/${ExecutionUUID}`);
+            attempts++;
+
+            if (validate(result)) {
+                return resolve({ "success": result.Status.Name === 'Success', "errorCode": 0, 'resultObject': result.AuditInfo.ResultObject });
+            }
+            else if (maxAttempts && attempts === maxAttempts) {
+                return resolve({ "success": false, "errorCode": 1 });
+            }
+            else {
+                setTimeout(executePoll, interval, resolve, reject);
+            }
+        };
+
+        return new Promise<any>(executePoll);
+    }
+
+    async runUnitTests(): Promise<unitTestsResult> {
+        try {
+            const result = await this.addonService.post(this.nebulaUnitTests, {});
+            const executionID = result.ExecutionUUID;
+            const pollResult = await this.pollExecution(this.addonService, executionID, 5000, 100);
+            if (pollResult.success) {
+                return JSON.parse(pollResult.resultObject);
+            }
+            else {
+                throw new Error(`Error in runUnitTests: ${pollResult.errorCode}`);
+            }
+        }
+        catch (ex) {
+            console.error(`Error in runUnitTests: ${ex}`);
+            throw new Error((ex as { message: string }).message);
+        }
+    }
+
     pnsUpdateSchemaSyncStatus(testingAddonUUID: string, tableName: string, arg2: boolean) {
         return
     }
@@ -59,6 +124,7 @@ export class NebulaTestService {
     nebulaGetResourcesRequiringSyncRelativeURL = `${this.nebulaSyncRelativeURL}/api/get_resources_requiring_sync`;
     nebulaGetRecordsRequiresSyncRelativeURL = `${this.nebulaSyncRelativeURL}/api/get_record_keys_requiring_sync`;
     nebulaGetRecordsRelativeURL = `${this.nebulaSyncRelativeURL}/inner_endpoints/get_records_of_schema_from_nebula`;
+    nebulaUnitTests = `${this.nebulaAsyncRelativeURL}/tests/neptune_graph_service`
 
     getRecordLabelFromAddonUUIDAndResource(addonUUID: string, resource: string) {
         return `Record_${this.replaceDashWithUnderscore(this.distributorUUID)}_${this.replaceDashWithUnderscore(addonUUID)}_${resource}`;

@@ -1,5 +1,5 @@
 //00000000-0000-0000-0000-000000006a91
-import { GetRecordsRequiringSyncResponse, NebulaTestService } from "./services/nebulatest.service";
+import { GetRecordsRequiringSyncResponse, unitTestsResult } from "./services/nebulatest.service";
 import GeneralService, { TesterFunctions } from "../../potentialQA_SDK/server_side/general.service";
 import { PerformanceManager } from "./services/performance_management/performance_manager";
 import { ResourceManagerService } from "./services/resource_management/resource_manager.service";
@@ -55,6 +55,20 @@ export async function NebulaTest(generalService: GeneralService, addonService: G
             SystemFilter: filter
         };
     }
+
+    describe('Nebula unit tests', () => {
+        const nebulaTestService = NebulaServiceFactory.getNebulaService(generalService, addonService.papiClient, dataObj, isLocal);
+        const performanceManager: PerformanceManager = new PerformanceManager();
+
+        it(`run the Nebula unit tests endpoint and make sure everything passed`, async () => {
+            performanceManager.startMeasure(`Test 1`, `run the Nebula unit tests endpoint and make sure everything passed`);
+            const results: unitTestsResult = await nebulaTestService.runUnitTests();
+            expect(results.stats.failures).to.equal(0,
+                `The following unit tests failed: ${JSON.stringify(results.tests.filter(test => test.failed === true))}`);
+            performanceManager.stopMeasure(`Test 1`);
+        })
+
+    })
 
     describe('NebulaTest Suites', () => {
         const nebulatestService = NebulaServiceFactory.getNebulaService(generalService, addonService.papiClient, dataObj, isLocal);
@@ -420,8 +434,8 @@ export async function NebulaTest(generalService: GeneralService, addonService: G
             performanceManager.stopMeasure("Test 3");
         });
 
-        it(`Create ADAL schema, wait for PNS, add items with Hidden=true, get resources requiring sync, and should not find the resource. get records requiring sync, and should not find the records. Get  them again with IncludeDeleted = true, and should find the records and resource.`, async () => {
-            performanceManager.startMeasure("Test 4", `Create ADAL schema, wait for PNS, add items with Hidden=true, get resources requiring sync, and should not find the resource. get records requiring sync, and should not find the records. Get  them again with IncludeDeleted = true, and should find the records and resource.`);
+        it(`Create ADAL schema, wait for PNS, add items with Hidden=true, get resources requiring sync, and should find the resource. get records requiring sync, and should not find the records. Get  them again with IncludeDeleted = true, and should find the records and resource.`, async () => {
+            performanceManager.startMeasure("Test 4", `Create ADAL schema, wait for PNS, add items with Hidden=true, get resources requiring sync, and should find the resource. get records requiring sync, and should not find the records. Get  them again with IncludeDeleted = true, and should find the records and resource.`);
 
             const tableName = "nebulaTestTable4" + getShortUUID();
             // create ADAL schema
@@ -466,13 +480,17 @@ export async function NebulaTest(generalService: GeneralService, addonService: G
             await nebulatestService.pnsInsertRecords(testingAddonUUID, tableName, test_4_items);
             console.log(`added items to table test_4_table_service: ${JSON.stringify(test_4_items)}`);
 
+             // wait for PNS to notify nebula about the new schema
+             await nebulatestService.waitForPNS();
+
+
             // get resources requiring sync using X
             let getResourcesRequiringSyncParameters = buildGetResourcesRequiringSyncParameters(currentTimeX);
             const resourcesRequiringSyncX = await nebulatestService.getResourcesRequiringSync(getResourcesRequiringSyncParameters);
             console.log(`resourcesRequiringSyncX: ${JSON.stringify(resourcesRequiringSyncX)}`);
 
-            // check that the resource is not in the list
-            expect(resourcesRequiringSyncX.find(resource => resource.Resource === tableName)).to.equal(undefined);
+            // check that the resource is in the list
+            expect(resourcesRequiringSyncX.find(resource => resource.Resource === tableName)).to.not.equal(undefined);
 
             // get records requiring sync using X
             let getRecordsRequiringSyncParams = buildGetRecordsRequiringSyncParameters(tableName, currentTimeX);
