@@ -2,7 +2,7 @@ export type SystemFilterType = 'None' | 'User' | 'Account';
 
 export interface SystemFilter {
     Type: SystemFilterType,
-    AccountKey?: string
+    AccountUUID?: string
 };
 
 export interface GetResourcesRequiringSyncResponse {
