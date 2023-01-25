@@ -3,6 +3,7 @@ import { PapiClient } from '@pepperi-addons/papi-sdk';
 import GeneralService from '../../../potentialQA_SDK/server_side/general.service';
 import jwtDecode from "jwt-decode";
 import { GetResourcesRequiringSyncParameters, GetResourcesRequiringSyncResponse, GetRecordsRequiringSyncParameters } from '../../entities/nebula/types';
+import { BasicRecord } from './NebulaPNSEmulator.service';
 
 export interface GetRecordsRequiringSyncResponse {
     Keys: string[],
@@ -33,6 +34,10 @@ export interface unitTestsResult {
 
 export class NebulaTestService {
     pnsInsertRecords(testingAddonUUID: string, tableName: string, test_7_items: import("./NebulaPNSEmulator.service").BasicRecord[]) {
+        return
+    }
+
+    async pnsUpdateRecords(addonUUID: string, resource: string, oldRecords: BasicRecord[], newRecords: BasicRecord[]) {
         return
     }
     //     try {
